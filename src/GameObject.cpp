@@ -58,7 +58,7 @@ void MyShip::move() {
 
 void MyShip::draw()
 {
-	ofSetColor(30, 30, 30);
+	ofSetColor(255, 255, 255);
 	ofDrawCircle(pos, radius);
 }
 

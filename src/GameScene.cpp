@@ -75,11 +75,14 @@ void GameScene::update()
 
 void GameScene::draw()
 {
+	ofSetColor(0, 15);
+	ofRect(0, 0, ofGetWidth(), ofGetHeight());
+
 	ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
 	ofScale(setting_parameter->scale, setting_parameter->scale);
 
 	ofSetColor(255, 255, 255);
-	back_ground->draw();
+	//back_ground->draw();
 
 	//-------side infos---------------
 	ofSetColor(0, 0, 0);
@@ -119,6 +122,8 @@ void GameScene::draw()
 		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
 	}
 	//-------objects-----------------
+	ofSetColor(0, 15);
+	ofRect(0, 0, ofGetWidth(), ofGetHeight());
 	if (attraction_or_repulsion && attraction_point) {
 		attraction_point->draw();
 	}
