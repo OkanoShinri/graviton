@@ -37,8 +37,8 @@ void MyShip::move() {
 
 	pos += vec*speed;
 
-	if (pos.x > ofGetWidth()*3/4) {
-		pos.x = ofGetWidth() * 3 / 4;
+	if (pos.x > ofGetWidth()) {
+		pos.x = ofGetWidth();
 		vec.x *= -1;
 	}
 	else if (pos.x < ofGetWidth() / 4) {

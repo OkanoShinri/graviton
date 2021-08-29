@@ -87,10 +87,8 @@ void GameScene::draw()
 	//-------side infos---------------
 	ofSetColor(0, 0, 0);
 	ofDrawRectangle(0, 0, setting_parameter->window_width / 4, setting_parameter->window_height);
-	ofDrawRectangle(setting_parameter->window_width * 3 / 4, 0, setting_parameter->window_width / 4, setting_parameter->window_height);
 	ofSetColor(255, 255, 255);
 	ofDrawRectangle(0, 0, setting_parameter->window_width / 4 - 5, setting_parameter->window_height);
-	ofDrawRectangle(setting_parameter->window_width * 3 / 4 + 5, 0, setting_parameter->window_width / 4, setting_parameter->window_height);
 
 	(is_transiting) ? ofSetColor(255, 10, 10) : ofSetColor(0, 0, 0);
 	char minute[3];
