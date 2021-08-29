@@ -36,6 +36,7 @@ private:
 	int transition_time = 0;
 	bool can_change_scene = false;
 	bool is_transiting = false;
+	bool attraction_or_repulsion = true;
 	std::unique_ptr<SettingParameter> setting_parameter;
 	std::unique_ptr<BackGroundImage> back_ground;
 	std::unique_ptr<MyShip> my_ship;

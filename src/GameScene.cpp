@@ -51,18 +51,19 @@ void GameScene::update()
 	}
 
 	//-------my_ship update------------
-	if (!attraction_point) {
-		my_ship->resetAttraction();
-	}
-	else {
+	if (attraction_or_repulsion && attraction_point) {
 		my_ship->addAttraction(attraction_point->getPos());
 	}
-	if (!repulsion_point) {
-		my_ship->resetRepulsion();
-	}
 	else {
+		my_ship->resetAttraction();
+	}
+	if (!attraction_or_repulsion && repulsion_point) {
 		my_ship->addRepulsion(repulsion_point->getPos());
 	}
+	else {
+		my_ship->resetRepulsion();
+	}
+
 	my_ship->update();
 	my_ship->draw();
 
@@ -118,10 +119,10 @@ void GameScene::draw()
 		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
 	}
 	//-------objects-----------------
-	if (attraction_point != nullptr) {
+	if (attraction_or_repulsion && attraction_point) {
 		attraction_point->draw();
 	}
-	if (repulsion_point != nullptr) {
+	if (!attraction_or_repulsion && repulsion_point) {
 		repulsion_point->draw();
 	}
 	my_ship->draw();
@@ -158,35 +159,30 @@ void GameScene::mouseMoved(int x, int y)
 void GameScene::mousePressed(int x, int y, int button)
 {
 	if (button == 0) {
-		if (repulsion_point != nullptr) {
-			repulsion_point.reset();
+		attraction_or_repulsion = !attraction_or_repulsion;
+		if (attraction_or_repulsion) {
+			if (!attraction_point) {
+				attraction_point = std::make_unique<AttractionPoint>(x, y);
+			}
+			else if ((x - attraction_point->getPos().x)*(x - attraction_point->getPos().x) + (y - attraction_point->getPos().y)*(y - attraction_point->getPos().y) < 100) {
+				//attraction_point.reset();
+			}
+			else
+			{
+				attraction_point->setPos(x, y);
+			}
 		}
-
-		if (!attraction_point) {
-			attraction_point = std::make_unique<AttractionPoint>(x, y);
-		}
-		else if ((x - attraction_point->getPos().x)*(x - attraction_point->getPos().x) + (y - attraction_point->getPos().y)*(y - attraction_point->getPos().y) < 100) {
-			attraction_point.reset();
-		}
-		else
-		{
-			attraction_point->setPos(x, y);
-		}
-	}
-	else if (button == 2) {
-		if (attraction_point != nullptr) {
-			attraction_point.reset();
-		}
-
-		if (!repulsion_point) {
-			repulsion_point = std::make_unique<RepulsionPoint>(x, y);
-		}
-		else if ((x - repulsion_point->getPos().x)*(x - repulsion_point->getPos().x) + (y - repulsion_point->getPos().y)*(y - repulsion_point->getPos().y) < 100) {
-			repulsion_point.reset();
-		}
-		else
-		{
-			repulsion_point->setPos(x, y);
+		else {
+			if (!repulsion_point) {
+				repulsion_point = std::make_unique<RepulsionPoint>(x, y);
+			}
+			else if ((x - repulsion_point->getPos().x)*(x - repulsion_point->getPos().x) + (y - repulsion_point->getPos().y)*(y - repulsion_point->getPos().y) < 100) {
+				//repulsion_point.reset();
+			}
+			else
+			{
+				repulsion_point->setPos(x, y);
+			}
 		}
 	}
 }
