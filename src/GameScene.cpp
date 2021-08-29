@@ -4,12 +4,14 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 {
 	setting_parameter = std::move(_setting_parameter);
 
-	this->can_change_scene = false;
-	this->is_transiting = false;
-	this->transition_counter = 0;
-	this->transition_time = 180;
+	can_change_scene = false;
+	is_transiting = false;
+	transition_counter = 0;
+	transition_time = 180;
 
-	this->my_ship = std::make_unique<MyShip>();
+	my_ship = std::make_unique<MyShip>();
+	attraction_point.reset();
+	repulsion_point.reset();
 
 	verdana = std::make_unique<ofTrueTypeFont>();
 	verdana->load("verdana.ttf", 30);
@@ -48,17 +50,26 @@ void GameScene::update()
 		return;
 	}
 
-	//-------add brick----------------
-	
-
 	//-------my_ship update------------
+	if (!attraction_point) {
+		my_ship->resetAttraction();
+	}
+	else {
+		my_ship->addAttraction(attraction_point->getPos());
+	}
+	if (!repulsion_point) {
+		my_ship->resetRepulsion();
+	}
+	else {
+		my_ship->addRepulsion(repulsion_point->getPos());
+	}
 	my_ship->update();
-
+	my_ship->draw();
 
 	//-------back ground------------
 	back_ground->updata();
 
-	this->counter++;
+	counter++;
 }
 
 void GameScene::draw()
@@ -67,15 +78,7 @@ void GameScene::draw()
 	ofScale(setting_parameter->scale, setting_parameter->scale);
 
 	ofSetColor(255, 255, 255);
-	//-------back ground------------
 	back_ground->draw();
-
-	
-
-
-	//-------my_ship draw--------------
-	ofSetColor(30, 30, 30);
-	this->my_ship->draw();
 
 	//-------side infos---------------
 	ofSetColor(0, 0, 0);
@@ -85,7 +88,7 @@ void GameScene::draw()
 	ofDrawRectangle(0, 0, setting_parameter->window_width / 4 - 5, setting_parameter->window_height);
 	ofDrawRectangle(setting_parameter->window_width * 3 / 4 + 5, 0, setting_parameter->window_width / 4, setting_parameter->window_height);
 
-	(this->is_transiting) ? ofSetColor(255, 10, 10) : ofSetColor(0, 0, 0);
+	(is_transiting) ? ofSetColor(255, 10, 10) : ofSetColor(0, 0, 0);
 	char minute[3];
 	sprintf_s(minute, "%02d", finish_time / 3600);
 	char second[3];
@@ -114,9 +117,17 @@ void GameScene::draw()
 		ofSetColor(255, 255, 255, ofMap(counter, 0, 30, 255, 0));
 		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
 	}
+	//-------objects-----------------
+	if (attraction_point != nullptr) {
+		attraction_point->draw();
+	}
+	if (repulsion_point != nullptr) {
+		repulsion_point->draw();
+	}
+	my_ship->draw();
 
 	//-------transition_out-----------
-	if (this->is_transiting)
+	if (is_transiting)
 	{
 		ofSetColor(255, 255, 255, ofMap(transition_counter, 0, transition_time, 0, 255));
 		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
@@ -131,7 +142,7 @@ void GameScene::keyPressed(int key) {
 	switch (key) {
 	case 'q':
 
-		this->can_change_scene = true;
+		can_change_scene = true;
 		break;
 	}
 }
@@ -142,4 +153,40 @@ void GameScene::keyReleased(int key)
 
 void GameScene::mouseMoved(int x, int y)
 {
+}
+
+void GameScene::mousePressed(int x, int y, int button)
+{
+	if (button == 0) {
+		if (repulsion_point != nullptr) {
+			repulsion_point.reset();
+		}
+
+		if (!attraction_point) {
+			attraction_point = std::make_unique<AttractionPoint>(x, y);
+		}
+		else if ((x - attraction_point->getPos().x)*(x - attraction_point->getPos().x) + (y - attraction_point->getPos().y)*(y - attraction_point->getPos().y) < 100) {
+			attraction_point.reset();
+		}
+		else
+		{
+			attraction_point->setPos(x, y);
+		}
+	}
+	else if (button == 2) {
+		if (attraction_point != nullptr) {
+			attraction_point.reset();
+		}
+
+		if (!repulsion_point) {
+			repulsion_point = std::make_unique<RepulsionPoint>(x, y);
+		}
+		else if ((x - repulsion_point->getPos().x)*(x - repulsion_point->getPos().x) + (y - repulsion_point->getPos().y)*(y - repulsion_point->getPos().y) < 100) {
+			repulsion_point.reset();
+		}
+		else
+		{
+			repulsion_point->setPos(x, y);
+		}
+	}
 }
