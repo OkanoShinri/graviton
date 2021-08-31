@@ -20,6 +20,7 @@ public:
 	void resetAttraction();
 	void addRepulsion(ofVec2f repulsion_pos);
 	void resetRepulsion();
+	void addStrongRepulsion(ofVec2f repulsion_pos);
 };
 
 class AttractionPoint
@@ -61,3 +62,4 @@ public:
 	}
 	void setPos(float x, float y);
 };
+

@@ -90,6 +90,15 @@ void MyShip::resetRepulsion()
 	repulsion = ofVec2f(0.0, 0.0);
 }
 
+void MyShip::addStrongRepulsion(ofVec2f repulsion_pos)
+{
+	if ((pos - repulsion_pos).length() < 10) {
+		return;
+	}
+	float G = 100.0;
+	repulsion = G / ((pos.x - repulsion_pos.x)*(pos.x - repulsion_pos.x) + (pos.y - repulsion_pos.y)*(pos.y - repulsion_pos.y)) * (pos - repulsion_pos);
+}
+
 AttractionPoint::AttractionPoint(float x, float y):
 	radius(10.0)
 {
@@ -135,3 +144,4 @@ void RepulsionPoint::setPos(float x, float y)
 	pos.x = x;
 	pos.y = y;
 }
+
