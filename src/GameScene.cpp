@@ -13,6 +13,11 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	attraction_point.reset();
 	repulsion_point.reset();
 
+	for (int i = 0; i < 10; i++)
+	{
+		targets.emplace_back(std::make_unique<Target>(i));
+	}
+
 	verdana = std::make_unique<ofTrueTypeFont>();
 	verdana->load("verdana.ttf", 30);
 	back_ground = std::make_unique<BackGroundImage>();
@@ -50,6 +55,18 @@ void GameScene::update()
 		return;
 	}
 
+	for (auto it = this->targets.begin(); it != this->targets.end();)
+	{
+		(*it)->update(my_ship->getPos());
+		if ((*it)->canRemove())
+		{
+			it = this->targets.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
+
 	//-------my_ship update------------
 	if (attraction_or_repulsion && attraction_point) {
 		my_ship->addAttraction(attraction_point->getPos());
@@ -84,6 +101,34 @@ void GameScene::draw()
 	ofSetColor(255, 255, 255);
 	//back_ground->draw();
 
+	
+
+	//-------transition_in------------
+	if (counter < 30)
+	{
+		ofSetColor(255, 255, 255, ofMap(counter, 0, 30, 255, 0));
+		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
+	}
+	//-------objects-----------------
+	ofSetColor(0, 15);
+	ofRect(0, 0, ofGetWidth(), ofGetHeight());
+
+	for (auto it = this->targets.begin(); it != this->targets.end();)
+	{
+		(*it)->draw();
+		it++;
+	}
+
+	if (attraction_or_repulsion && attraction_point) {
+		attraction_point->draw();
+	}
+	if (!attraction_or_repulsion && repulsion_point) {
+		repulsion_point->draw();
+	}
+	my_ship->draw();
+
+
+
 	//-------side infos---------------
 	ofSetColor(0, 0, 0);
 	ofDrawRectangle(0, 0, setting_parameter->window_width / 4, setting_parameter->window_height);
@@ -112,23 +157,6 @@ void GameScene::draw()
 	ofDrawBitmapString("se:  " + se_param.str(), 100, setting_parameter->window_height / 2 + 50);
 
 	ofDrawBitmapString(ofToString(ofGetFrameRate()) + "fps", 20, setting_parameter->window_height - 50);
-
-	//-------transition_in------------
-	if (counter < 30)
-	{
-		ofSetColor(255, 255, 255, ofMap(counter, 0, 30, 255, 0));
-		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
-	}
-	//-------objects-----------------
-	ofSetColor(0, 15);
-	ofRect(0, 0, ofGetWidth(), ofGetHeight());
-	if (attraction_or_repulsion && attraction_point) {
-		attraction_point->draw();
-	}
-	if (!attraction_or_repulsion && repulsion_point) {
-		repulsion_point->draw();
-	}
-	my_ship->draw();
 
 	//-------transition_out-----------
 	if (is_transiting)

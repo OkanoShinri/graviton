@@ -145,3 +145,24 @@ void RepulsionPoint::setPos(float x, float y)
 	pos.y = y;
 }
 
+Target::Target(int id) :
+	id(id), radius(20.0), can_remove(false)
+{
+	pos = ofVec2f(ofRandom(ofGetWidth() / 4, ofGetWidth()), ofRandom(ofGetHeight()));
+}
+
+void Target::update(ofVec2f my_pos)
+{
+	can_remove = is_hit(my_pos);
+}
+
+void Target::draw()
+{
+	ofSetColor(200, 200, 200);
+	ofDrawCircle(pos, radius);
+}
+
+bool Target::is_hit(ofVec2f my_pos)
+{
+	return pos.distance(my_pos) < radius;
+}

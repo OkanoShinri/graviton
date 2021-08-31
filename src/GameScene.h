@@ -42,6 +42,7 @@ private:
 	std::unique_ptr<MyShip> my_ship;
 	std::unique_ptr<AttractionPoint> attraction_point;
 	std::unique_ptr<RepulsionPoint> repulsion_point;
+	std::list< std::unique_ptr<Target> > targets;
 	std::unique_ptr<ofSoundPlayer> game_bgm, shot_se;
 	SceneIdx next_scene = title_scene;
 	std::unique_ptr<ofTrueTypeFont> verdana;
