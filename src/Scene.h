@@ -40,6 +40,7 @@ public:
 	bool canChangeScene() {
 		return false;
 	}
+	void mousePressed(int x, int y, int button) {};
 private:
 	std::unique_ptr<SettingParameter> setting_parameter;
 };
@@ -57,6 +58,7 @@ public:
 	bool canChangeScene() {
 		return can_change_scene;
 	}
+	void mousePressed(int x, int y, int button) {};
 private:
 	void update();
 	void draw();
@@ -88,6 +90,7 @@ public:
 	bool canChangeScene() {
 		return can_change_scene;
 	}
+	void mousePressed(int x, int y, int button) {};
 private:
 	void update();
 	void draw();

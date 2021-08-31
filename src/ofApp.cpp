@@ -2,6 +2,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+	ofSetFrameRate(60);
+	ofBackground(0);
+	ofSetBackgroundAuto(false);
+
 	this->current_scene = sceneFactory(Scene::title_scene);
 }
 
@@ -43,6 +47,7 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
+	this->current_scene->mousePressed(x, y, button);
 }
 
 //--------------------------------------------------------------
