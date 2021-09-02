@@ -12,7 +12,7 @@ TitleScene::TitleScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	transition_time = 60;
 	can_change_scene = false;
 	is_transiting = false;
-	next_scene = Scene::play_game_scene;
+	next_scene = Scene::game_scene1;
 
 	choice_idx = 0;
 	push_counter = 0;
@@ -44,13 +44,13 @@ void TitleScene::update()
 	switch (choice_idx)
 	{
 	case 0:
-		this->next_scene = Scene::play_game_scene;
+		this->next_scene = Scene::game_scene1;
 		break;
 	case 1:
 		this->next_scene = Scene::setting_scene;
 		break;
 	case 2:
-		this->next_scene = Scene::quit_game_scene;
+		this->next_scene = Scene::quit_scene;
 		break;
 	default:
 		break;

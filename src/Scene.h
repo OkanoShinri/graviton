@@ -7,7 +7,8 @@
 
 class Scene {
 public:
-	enum SceneIdx { quit_game_scene = 0, title_scene, play_game_scene, setting_scene };
+	enum SceneIdx { quit_scene = 0, title_scene, setting_scene, game_scene1, game_scene2
+	};
 
 	virtual ~Scene() {};
 	virtual std::unique_ptr<SettingParameter> getSettingParameter() = 0;
@@ -74,7 +75,7 @@ private:
 
 	std::unique_ptr<ofTrueTypeFont> Oranienbaum, Oranienbaum_big;
 	std::unique_ptr<SettingParameter> setting_parameter;
-	SceneIdx next_scene = play_game_scene;
+	SceneIdx next_scene = game_scene1;
 };
 
 class SettingScene :public Scene {
