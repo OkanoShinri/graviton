@@ -23,13 +23,16 @@ public:
 	}
 private:
 	void draw();
-	void feadout(int mun) {};
 	void keyPressed(int key);
 	void keyReleased(int key);
 	void mouseMoved(int x, int y);
 	void mousePressed(int x, int y, int button);
 	void update();
 
+	enum State {
+		transition_in = 0, play, game_over, transition_out
+	};
+	State game_state;
 	int counter = 0;
 	int finish_time = 0;
 	int transition_counter = 0;
@@ -45,7 +48,7 @@ private:
 	std::list< std::unique_ptr<Target> > targets;
 	std::unique_ptr<ofSoundPlayer> game_bgm, shot_se;
 	SceneIdx next_scene = title_scene;
-	std::unique_ptr<ofTrueTypeFont> verdana;
+	std::unique_ptr<ofTrueTypeFont> SourceHanSans;
 };
 
 class GameScene2 :
@@ -87,5 +90,5 @@ private:
 	std::list< std::unique_ptr<Target> > targets;
 	std::unique_ptr<ofSoundPlayer> game_bgm, shot_se;
 	SceneIdx next_scene = title_scene;
-	std::unique_ptr<ofTrueTypeFont> verdana;
+	std::unique_ptr<ofTrueTypeFont> SourceHanSans;
 };

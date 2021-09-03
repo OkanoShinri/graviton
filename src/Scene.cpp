@@ -17,10 +17,10 @@ TitleScene::TitleScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	choice_idx = 0;
 	push_counter = 0;
 
-	Oranienbaum = std::make_unique<ofTrueTypeFont>();
-	Oranienbaum_big = std::make_unique<ofTrueTypeFont>();
-	Oranienbaum->load("Oranienbaum.ttf", 30);
-	Oranienbaum_big->load("Oranienbaum.ttf", 60);
+	SourceHanSans = std::make_unique<ofTrueTypeFont>();
+	SourceHanSans_big = std::make_unique<ofTrueTypeFont>();
+	SourceHanSans->load("SourceHanSans001.ttf", 30);
+	SourceHanSans_big->load("SourceHanSans001.ttf", 60);
 }
 
 TitleScene::~TitleScene()
@@ -70,13 +70,13 @@ void TitleScene::draw()
 	ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
 
 	ofSetColor(0, 0, 0);
-	Oranienbaum_big->drawString("**Insert Title**", 400, 300);
+	SourceHanSans_big->drawString("**Insert Title**", 400, 300);
 	std::string version = "ver ";
 	version += setting_parameter->version;
-	Oranienbaum->drawString(version, 850, 350);
-	Oranienbaum->drawString("Start", start_pos.x, start_pos.y);
-	Oranienbaum->drawString("Setting", setting_pos.x, setting_pos.y);
-	Oranienbaum->drawString("Quit", quit_pos.x, quit_pos.y);
+	SourceHanSans->drawString(version, 850, 350);
+	SourceHanSans->drawString("Start", start_pos.x, start_pos.y);
+	SourceHanSans->drawString("Setting", setting_pos.x, setting_pos.y);
+	SourceHanSans->drawString("Quit", quit_pos.x, quit_pos.y);
 
 	int size_of_r = 15;
 	ofPushMatrix();
@@ -142,8 +142,8 @@ SettingScene::SettingScene(std::unique_ptr<SettingParameter> _setting_parameter)
 	choice_idx = 0;
 	push_counter = 0;
 	push_counter2 = 0;
-	Oranienbaum = std::make_unique<ofTrueTypeFont>();
-	Oranienbaum->load("Oranienbaum.ttf", 30);
+	SourceHanSans = std::make_unique<ofTrueTypeFont>();
+	SourceHanSans->load("SourceHanSans001.ttf", 30);
 }
 
 SettingScene::~SettingScene()
@@ -182,9 +182,9 @@ void SettingScene::draw()
 	ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
 
 	ofSetColor(0, 0, 0);
-	Oranienbaum->drawString("Setting", setting_parameter->window_width / 2 - 30, 50);
+	SourceHanSans->drawString("Setting", setting_parameter->window_width / 2 - 30, 50);
 
-	Oranienbaum->drawString("BGM Volume", volume_pos.x, volume_pos.y);
+	SourceHanSans->drawString("BGM Volume", volume_pos.x, volume_pos.y);
 	ofSetLineWidth(2.0);
 	ofDrawLine(bar_left, volume_pos.y, bar_right, volume_pos.y);
 	ofNoFill();
@@ -194,7 +194,7 @@ void SettingScene::draw()
 	ofSetLineWidth(1.0);
 	ofDrawCircle(ofMap(setting_parameter->bgm_volume, 0, 1, bar_left, bar_right), volume_pos.y, 10);
 
-	Oranienbaum->drawString("SE Volume", se_pos.x, se_pos.y);
+	SourceHanSans->drawString("SE Volume", se_pos.x, se_pos.y);
 	ofSetLineWidth(2.0);
 	ofDrawLine(bar_left, se_pos.y, bar_right, se_pos.y);
 	ofNoFill();
@@ -204,27 +204,27 @@ void SettingScene::draw()
 	ofSetLineWidth(1.0);
 	ofDrawCircle(ofMap(setting_parameter->se_volume, 0, 1, bar_left, bar_right), se_pos.y, 10);
 
-	Oranienbaum->drawString("Full Screen", fullscreen_pos.x, fullscreen_pos.y);
-	Oranienbaum->drawString("ON", fullscreen_pos.x * 4, fullscreen_pos.y);
-	Oranienbaum->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
+	SourceHanSans->drawString("Full Screen", fullscreen_pos.x, fullscreen_pos.y);
+	SourceHanSans->drawString("ON", fullscreen_pos.x * 4, fullscreen_pos.y);
+	SourceHanSans->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
 	if (setting_parameter->is_fullscreen) {
 		ofDrawRectangle(fullscreen_pos.x * 4 - 15, fullscreen_pos.y - 40, 75, 50);
-		Oranienbaum->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
+		SourceHanSans->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
 		ofSetColor(255, 255, 255);
-		Oranienbaum->drawString("ON", fullscreen_pos.x * 4, fullscreen_pos.y);
+		SourceHanSans->drawString("ON", fullscreen_pos.x * 4, fullscreen_pos.y);
 	}
 	else {
 		ofDrawRectangle(fullscreen_pos.x * 6 - 20, fullscreen_pos.y - 40, 100, 50);
-		Oranienbaum->drawString("ON", bar_left, fullscreen_pos.y);
+		SourceHanSans->drawString("ON", bar_left, fullscreen_pos.y);
 		ofSetColor(255, 255, 255);
-		Oranienbaum->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
+		SourceHanSans->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
 	}
 	ofSetColor(0, 0, 0);
 
-	Oranienbaum->drawString("Number of balls", num_of_balls_pos.x, num_of_balls_pos.y);
-	Oranienbaum->drawString(std::to_string(setting_parameter->num_ball), num_of_balls_pos.x * 5, num_of_balls_pos.y);
+	SourceHanSans->drawString("Number of balls", num_of_balls_pos.x, num_of_balls_pos.y);
+	SourceHanSans->drawString(std::to_string(setting_parameter->num_ball), num_of_balls_pos.x * 5, num_of_balls_pos.y);
 
-	Oranienbaum->drawString("Return", return_pos.x, return_pos.y);
+	SourceHanSans->drawString("Return", return_pos.x, return_pos.y);
 
 	//----------cursor----------------
 	int size_of_cursor_r = 15;
@@ -344,7 +344,7 @@ void SettingScene::toggle_fullscreen()
 	ofToggleFullscreen();
 	setting_parameter->is_fullscreen = !setting_parameter->is_fullscreen;
 	float w = ofGetWindowWidth(), h = ofGetWindowHeight();
-	setting_parameter->scale = std::min(w / 1280, h / 720);
-	setting_parameter->offset_x = (w - 1280 * setting_parameter->scale) / 2;
-	setting_parameter->offset_y = (h - 720 * setting_parameter->scale) / 2;
+	setting_parameter->scale = std::min(w / 1024, h / 768);
+	setting_parameter->offset_x = (w - 1024 * setting_parameter->scale) / 2;
+	setting_parameter->offset_y = (h - 768 * setting_parameter->scale) / 2;
 }

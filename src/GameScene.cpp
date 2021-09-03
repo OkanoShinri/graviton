@@ -18,8 +18,10 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 		targets.emplace_back(std::make_unique<Target>(i));
 	}
 
-	verdana = std::make_unique<ofTrueTypeFont>();
-	verdana->load("verdana.ttf", 30);
+	game_state = transition_in;
+
+	SourceHanSans = std::make_unique<ofTrueTypeFont>();
+	SourceHanSans->load("SourceHanSans001.ttf", 30);
 	back_ground = std::make_unique<BackGroundImage>();
 
 	shot_se = std::make_unique<ofSoundPlayer>();
@@ -33,7 +35,7 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	game_bgm->load(bgms[idx]);
 	game_bgm->setLoop(true);
 	game_bgm->setVolume(setting_parameter->bgm_volume);
-	game_bgm->play();
+	//game_bgm->play();
 }
 
 GameScene::~GameScene()
@@ -43,65 +45,76 @@ GameScene::~GameScene()
 
 void GameScene::update()
 {
-	if (is_transiting) {
-		game_bgm->setVolume(ofMap(transition_counter, 0.0, transition_time, setting_parameter->bgm_volume, 0.0));
-
-		if (transition_counter < transition_time) {
-			transition_counter++;
-		}
-		else {
-			can_change_scene = true;
-		}
-		return;
-	}
-
-	for (auto it = this->targets.begin(); it != this->targets.end();)
-	{
-		(*it)->update(my_ship->getPos());
-		if ((*it)->canRemove())
-		{
-			it = this->targets.erase(it);
-		}
-		else {
-			++it;
-		}
-	}
-
-	//-------my_ship update------------
-	if (attraction_or_repulsion && attraction_point) {
-		my_ship->addAttraction(attraction_point->getPos());
-	}
-	else {
-		my_ship->resetAttraction();
-	}
-	if (!attraction_or_repulsion && repulsion_point) {
-		my_ship->addRepulsion(repulsion_point->getPos());
-	}
-	else {
-		my_ship->resetRepulsion();
-	}
-
-	my_ship->update();
-	my_ship->draw();
-
-	//-------back ground------------
 	back_ground->updata();
 
+	switch (game_state)
+	{
+	case GameScene::transition_in:
+		if (counter == 120) {
+			game_state = play;
+			counter = 0;
+			game_bgm->play();
+		}
+		break;
+	case GameScene::play:
+		if (attraction_or_repulsion && attraction_point) {
+			my_ship->addAttraction(attraction_point->getPos());
+		}
+		else {
+			my_ship->resetAttraction();
+		}
+		if (!attraction_or_repulsion && repulsion_point) {
+			my_ship->addRepulsion(repulsion_point->getPos());
+		}
+		else {
+			my_ship->resetRepulsion();
+		}
+
+		my_ship->update();
+		my_ship->draw();
+
+		for (auto it = this->targets.begin(); it != this->targets.end();)
+		{
+			(*it)->update(my_ship->getPos());
+			if ((*it)->canRemove())
+			{
+				it = this->targets.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+
+		if (targets.empty())
+		{
+			game_state = transition_out;
+			counter = 0;
+		}
+		break;
+	case GameScene::game_over:
+		break;
+	case GameScene::transition_out:
+		game_bgm->setVolume(ofMap(counter, 0.0, transition_time, setting_parameter->bgm_volume, 0.0));
+		if (counter == transition_time) {
+			can_change_scene = true;
+		}
+		break;
+	default:
+		break;
+	}
+
 	counter++;
+
 }
 
 void GameScene::draw()
 {
-	ofSetColor(0, 15);
-	ofRect(0, 0, ofGetWidth(), ofGetHeight());
-
-	ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
-	ofScale(setting_parameter->scale, setting_parameter->scale);
-
-	ofSetColor(255, 255, 255);
-	//back_ground->draw();
-
 	
+	//ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
+	//ofScale(setting_parameter->scale, setting_parameter->scale);
+	//back_ground->draw();
+	ofSetColor(255, 255, 255);
+	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
 	//-------transition_in------------
 	if (counter < 30)
@@ -131,9 +144,9 @@ void GameScene::draw()
 
 	//-------side infos---------------
 	ofSetColor(0, 0, 0);
-	ofDrawRectangle(0, 0, setting_parameter->window_width / 4, setting_parameter->window_height);
+	ofDrawRectangle(0, 0, setting_parameter->window_width / 5, setting_parameter->window_height);
 	ofSetColor(255, 255, 255);
-	ofDrawRectangle(0, 0, setting_parameter->window_width / 4 - 5, setting_parameter->window_height);
+	ofDrawRectangle(0, 0, setting_parameter->window_width / 5 - 5, setting_parameter->window_height);
 
 	(is_transiting) ? ofSetColor(255, 10, 10) : ofSetColor(0, 0, 0);
 	char minute[3];
@@ -142,7 +155,7 @@ void GameScene::draw()
 	sprintf_s(second, "%02d", (finish_time / 60) % 60);
 	char m_second[3];
 	sprintf_s(m_second, "%02d", (int)ofMap(finish_time % 60, 0, 60, 0, 99));
-	verdana->drawString("" + std::string(minute) + ":" + std::string(second) + "." + std::string(m_second), 50, setting_parameter->window_height / 4);
+	SourceHanSans->drawString("" + std::string(minute) + ":" + std::string(second) + "." + std::string(m_second), 30,100);
 
 	ofSetColor(0, 0, 0);
 	if (game_bgm->isPlaying())
@@ -174,6 +187,10 @@ void GameScene::keyPressed(int key) {
 	switch (key) {
 	case 'q':
 		next_scene = title_scene;
+		can_change_scene = true;
+		break;
+	case 'r':
+		next_scene = game_scene1;
 		can_change_scene = true;
 		break;
 	}
@@ -241,8 +258,8 @@ GameScene2::GameScene2(std::unique_ptr<SettingParameter>&& _setting_parameter)
 		targets.emplace_back(std::make_unique<Target>(i));
 	}
 
-	verdana = std::make_unique<ofTrueTypeFont>();
-	verdana->load("verdana.ttf", 30);
+	SourceHanSans = std::make_unique<ofTrueTypeFont>();
+	SourceHanSans->load("SourceHanSans001.ttf", 30);
 	back_ground = std::make_unique<BackGroundImage>();
 
 	shot_se = std::make_unique<ofSoundPlayer>();
@@ -365,7 +382,7 @@ void GameScene2::draw()
 	sprintf_s(second, "%02d", (finish_time / 60) % 60);
 	char m_second[3];
 	sprintf_s(m_second, "%02d", (int)ofMap(finish_time % 60, 0, 60, 0, 99));
-	verdana->drawString("" + std::string(minute) + ":" + std::string(second) + "." + std::string(m_second), 50, setting_parameter->window_height / 4);
+	SourceHanSans->drawString("" + std::string(minute) + ":" + std::string(second) + "." + std::string(m_second), 50, setting_parameter->window_height / 4);
 
 	ofSetColor(0, 0, 0);
 	if (game_bgm->isPlaying())
@@ -396,7 +413,11 @@ void GameScene2::draw()
 void GameScene2::keyPressed(int key) {
 	switch (key) {
 	case 'q':
-
+		next_scene = title_scene;
+		can_change_scene = true;
+		break;
+	case 'r':
+		next_scene = game_scene2;
 		can_change_scene = true;
 		break;
 	}

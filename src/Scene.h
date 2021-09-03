@@ -73,7 +73,7 @@ private:
 	int choice_idx; //play = 0, setting, quit,
 	int push_counter;
 
-	std::unique_ptr<ofTrueTypeFont> Oranienbaum, Oranienbaum_big;
+	std::unique_ptr<ofTrueTypeFont> SourceHanSans, SourceHanSans_big;
 	std::unique_ptr<SettingParameter> setting_parameter;
 	SceneIdx next_scene = game_scene1;
 };
@@ -106,7 +106,7 @@ private:
 	int choice_idx; //play = 0, setting, quit,
 	int push_counter, push_counter2;
 
-	std::unique_ptr<ofTrueTypeFont> Oranienbaum;
+	std::unique_ptr<ofTrueTypeFont> SourceHanSans;
 	std::unique_ptr<SettingParameter> setting_parameter;
 	SceneIdx next_scene = title_scene;
 };

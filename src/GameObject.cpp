@@ -41,8 +41,8 @@ void MyShip::move() {
 		pos.x = ofGetWidth();
 		vec.x *= -1;
 	}
-	else if (pos.x < ofGetWidth() / 4) {
-		pos.x = ofGetWidth() / 4;
+	else if (pos.x < ofGetWidth() / 5) {
+		pos.x = ofGetWidth() / 5;
 		vec.x *= -1;
 	}
 
@@ -58,7 +58,7 @@ void MyShip::move() {
 
 void MyShip::draw()
 {
-	ofSetColor(255, 255, 255);
+	ofSetColor(0, 0, 0);
 	ofDrawCircle(pos, radius);
 }
 

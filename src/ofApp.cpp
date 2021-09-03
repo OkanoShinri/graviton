@@ -6,7 +6,7 @@ void ofApp::setup() {
 	ofBackground(0);
 	ofSetBackgroundAuto(false);
 
-	this->current_scene = sceneFactory(Scene::title_scene);
+	this->current_scene = sceneFactory(Scene::game_scene1);
 }
 
 //--------------------------------------------------------------
