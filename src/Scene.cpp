@@ -8,17 +8,12 @@ QuitScene::QuitScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 TitleScene::TitleScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 {
 	setting_parameter = std::move(_setting_parameter);
-	transition_counter = 0;
-	transition_time = 60;
 	can_change_scene = false;
-	is_transiting = false;
-	next_scene = Scene::game_scene1;
+	next_scene = Scene::menu_scene;
+	game_state = TitleScene::opening;
 
-	choice_idx = 0;
-	push_counter = 0;
-
-	SourceHanSans = std::make_unique<ofTrueTypeFont>();
-	SourceHanSans_big = std::make_unique<ofTrueTypeFont>();
+	SourceHanSans = std::make_shared<ofTrueTypeFont>();
+	SourceHanSans_big = std::make_shared<ofTrueTypeFont>();
 	SourceHanSans->load("SourceHanSans001.ttf", 30);
 	SourceHanSans_big->load("SourceHanSans001.ttf", 60);
 }
@@ -29,6 +24,75 @@ TitleScene::~TitleScene()
 }
 
 void TitleScene::update()
+{
+	switch (game_state)
+	{
+	case TitleScene::opening:
+		if (counter > 0) {
+			game_state = TitleScene::play;
+			counter = 0;
+		}
+		break;
+	case TitleScene::play:
+		break;
+	case TitleScene::ending:
+		if (counter == 60) {
+			next_scene = Scene::menu_scene;
+			can_change_scene = true;
+		}
+		break;
+	default:
+		break;
+	}
+	counter++;
+
+}
+
+void TitleScene::draw()
+{
+	ofSetColor(255,255,255);
+	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+	ofSetColor(0, 0, 0);
+	SourceHanSans_big->drawString("graviton", 400, 300);
+
+}
+
+void TitleScene::keyPressed(int key) {
+	if (game_state != TitleScene::ending) {
+		game_state = TitleScene::ending;
+		counter = 0;
+	}
+}
+
+MenuScene::MenuScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
+{
+	setting_parameter = std::move(_setting_parameter);
+	transition_counter = 0;
+	transition_time = 60;
+	can_change_scene = false;
+	is_transiting = false;
+	next_scene = Scene::game_scene1;
+
+	choice_idx = 0;
+	push_counter = 0;
+
+	std::vector<SceneIdx> data{ game_scene1,game_scene2 };
+	std::vector<std::string> data_str{ "room1","room2" };
+
+	game_selector = std::make_unique<Selector<SceneIdx>>(data, data_str, true);
+
+	SourceHanSans = std::make_shared<ofTrueTypeFont>();
+	SourceHanSans_big = std::make_shared<ofTrueTypeFont>();
+	SourceHanSans->load("SourceHanSans001.ttf", 30);
+	SourceHanSans_big->load("SourceHanSans001.ttf", 60);
+}
+
+MenuScene::~MenuScene()
+{
+	std::cout << "Remove: TitleScene" << std::endl;
+}
+
+void MenuScene::update()
 {
 	if (is_transiting) {
 		if (transition_counter < transition_time) {
@@ -57,10 +121,11 @@ void TitleScene::update()
 	}
 }
 
-void TitleScene::draw()
+void MenuScene::draw()
 {
 	ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
 	ofScale(setting_parameter->scale, setting_parameter->scale);
+
 
 	ofVec2f start_pos = ofVec2f(setting_parameter->window_width / 4, setting_parameter->window_height * 3 / 4);
 	ofVec2f setting_pos = ofVec2f(setting_parameter->window_width / 2, setting_parameter->window_height * 3 / 4);
@@ -77,6 +142,8 @@ void TitleScene::draw()
 	SourceHanSans->drawString("Start", start_pos.x, start_pos.y);
 	SourceHanSans->drawString("Setting", setting_pos.x, setting_pos.y);
 	SourceHanSans->drawString("Quit", quit_pos.x, quit_pos.y);
+
+	game_selector->draw(400, 700, SourceHanSans);
 
 	int size_of_r = 15;
 	ofPushMatrix();
@@ -110,7 +177,7 @@ void TitleScene::draw()
 	}
 }
 
-void TitleScene::keyPressed(int key) {
+void MenuScene::keyPressed(int key) {
 	if (this->is_transiting) {
 		return;
 	}
@@ -128,6 +195,7 @@ void TitleScene::keyPressed(int key) {
 		break;
 	}
 }
+
 
 SettingScene::SettingScene(std::unique_ptr<SettingParameter> _setting_parameter)
 {

@@ -1,13 +1,15 @@
 #pragma once
 #include "ofMain.h"
 #include "SettingParameter.h"
+#include "Component.h"
 #include <iostream>
 #include <memory>
 #include <list>
 
 class Scene {
 public:
-	enum SceneIdx { quit_scene = 0, title_scene, setting_scene, game_scene1, game_scene2
+	enum SceneIdx {
+		quit_scene = 0, title_scene, menu_scene, setting_scene, game_scene1, game_scene2
 	};
 
 	virtual ~Scene() {};
@@ -64,6 +66,34 @@ private:
 	void update();
 	void draw();
 	void keyPressed(int key);
+
+	bool can_change_scene;
+	enum State { opening = 0, play, ending };
+	State game_state;
+	int counter;
+	SceneIdx next_scene;
+	std::shared_ptr<ofTrueTypeFont> SourceHanSans, SourceHanSans_big;
+	std::unique_ptr<SettingParameter> setting_parameter;
+};
+
+class MenuScene :public Scene {
+public:
+	MenuScene(std::unique_ptr<SettingParameter>&& _setting_parameter);
+	~MenuScene();
+	std::unique_ptr<SettingParameter> getSettingParameter() {
+		return std::move(setting_parameter);
+	}
+	SceneIdx getNextScene() {
+		return next_scene;
+	}
+	bool canChangeScene() {
+		return can_change_scene;
+	}
+	void mousePressed(int x, int y, int button) {};
+private:
+	void update();
+	void draw();
+	void keyPressed(int key);
 	void feadout(int mun) {};
 
 	int transition_counter = 0;
@@ -73,9 +103,10 @@ private:
 	int choice_idx; //play = 0, setting, quit,
 	int push_counter;
 
-	std::unique_ptr<ofTrueTypeFont> SourceHanSans, SourceHanSans_big;
+	std::shared_ptr<ofTrueTypeFont> SourceHanSans, SourceHanSans_big;
 	std::unique_ptr<SettingParameter> setting_parameter;
 	SceneIdx next_scene = game_scene1;
+	std::unique_ptr<Selector<SceneIdx>> game_selector;
 };
 
 class SettingScene :public Scene {

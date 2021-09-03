@@ -1,8 +1,10 @@
 #pragma once
 #include "ofMain.h"
+#include <cassert>
 #include <iostream>
 #include <memory>
-#include <list>
+#include <string>
+#include <vector>
 
 class Timer
 {
@@ -42,10 +44,35 @@ private:
 };
 
 
-class Selector 
+template <typename T> class Selector
 {
 public:
+	inline Selector(std::vector<T> init_choices,std::vector<std::string> init_choices_str, bool roop) :
+		choice_idx(0)
+	{
+		assert(init_choices.size() > 0);
+		assert(init_choices.size() == init_choices_str.size());
 
+		choices = init_choices;
+		choices_str = init_choices_str;
+		is_roop = roop;
+	};
+	inline void change_left() {
+		choice_idx = (choice_idx - 1) % choices.size();
+	};
+	inline void change_right() {
+		choice_idx = (choice_idx + 1) % choices.size();
+	};
+	inline void draw(int x, int y, std::shared_ptr<ofTrueTypeFont> font) {
+		font->drawString(choices_str[choice_idx], x, y);
+	};
+	void update() {};
+	inline T enter() {
+		return choices[choice_idx];
+	};
 private:
+	std::vector<T> choices;
+	std::vector<std::string> choices_str;
+	int counter, choice_idx;
+	bool is_roop;
 };
-

@@ -334,7 +334,7 @@ void GameScene2::update()
 void GameScene2::draw()
 {
 	ofSetColor(0, 15);
-	ofRect(0, 0, ofGetWidth(), ofGetHeight());
+	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
 	ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
 	ofScale(setting_parameter->scale, setting_parameter->scale);
@@ -352,7 +352,7 @@ void GameScene2::draw()
 	}
 	//-------objects-----------------
 	ofSetColor(0, 15);
-	ofRect(0, 0, ofGetWidth(), ofGetHeight());
+	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
 	for (auto it = this->targets.begin(); it != this->targets.end();)
 	{

@@ -6,7 +6,7 @@ void ofApp::setup() {
 	ofBackground(0);
 	ofSetBackgroundAuto(false);
 
-	this->current_scene = sceneFactory(Scene::game_scene1);
+	this->current_scene = sceneFactory(Scene::title_scene);
 }
 
 //--------------------------------------------------------------
@@ -83,6 +83,9 @@ std::unique_ptr<Scene> ofApp::sceneFactory(Scene::SceneIdx idx)
 		break;
 	case Scene::title_scene:
 		return std::make_unique<TitleScene>(std::move(setting_parameter));
+		break;
+	case Scene::menu_scene:
+		return std::make_unique<MenuScene>(std::move(setting_parameter));
 		break;
 	case Scene::setting_scene:
 		return std::make_unique<SettingScene>(std::move(setting_parameter));
