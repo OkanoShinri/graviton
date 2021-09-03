@@ -6,8 +6,8 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 
 	can_change_scene = false;
 	is_transiting = false;
-	transition_counter = 0;
-	transition_time = 180;
+
+	timer = std::make_unique<Timer>();
 
 	my_ship = std::make_unique<MyShip>();
 	attraction_point.reset();
@@ -18,9 +18,9 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 		targets.emplace_back(std::make_unique<Target>(i));
 	}
 
-	game_state = transition_in;
+	game_state = opening;
 
-	SourceHanSans = std::make_unique<ofTrueTypeFont>();
+	SourceHanSans = std::make_shared<ofTrueTypeFont>();
 	SourceHanSans->load("SourceHanSans001.ttf", 30);
 	back_ground = std::make_unique<BackGroundImage>();
 
@@ -35,7 +35,6 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	game_bgm->load(bgms[idx]);
 	game_bgm->setLoop(true);
 	game_bgm->setVolume(setting_parameter->bgm_volume);
-	//game_bgm->play();
 }
 
 GameScene::~GameScene()
@@ -46,13 +45,15 @@ GameScene::~GameScene()
 void GameScene::update()
 {
 	back_ground->updata();
+	timer->update();
 
 	switch (game_state)
 	{
-	case GameScene::transition_in:
+	case GameScene::opening:
 		if (counter == 120) {
 			game_state = play;
 			counter = 0;
+			timer->start();
 			game_bgm->play();
 		}
 		break;
@@ -87,15 +88,16 @@ void GameScene::update()
 
 		if (targets.empty())
 		{
-			game_state = transition_out;
+			game_state = ending;
+			timer->stop();
 			counter = 0;
 		}
 		break;
 	case GameScene::game_over:
 		break;
-	case GameScene::transition_out:
-		game_bgm->setVolume(ofMap(counter, 0.0, transition_time, setting_parameter->bgm_volume, 0.0));
-		if (counter == transition_time) {
+	case GameScene::ending:
+		game_bgm->setVolume(ofMap(counter, 0.0, 180, setting_parameter->bgm_volume, 0.0)); //180fでフェードアウト
+		if (counter == 180) {
 			can_change_scene = true;
 		}
 		break;
@@ -116,46 +118,53 @@ void GameScene::draw()
 	ofSetColor(255, 255, 255);
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 
-	//-------transition_in------------
-	if (counter < 30)
+	switch (game_state)
 	{
-		ofSetColor(255, 255, 255, ofMap(counter, 0, 30, 255, 0));
+	case GameScene::opening:
+		ofSetColor(255, 255, 255, ofMap(counter, 0, 120, 255, 0));
 		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
-	}
-	//-------objects-----------------
-	ofSetColor(0, 15);
-	ofRect(0, 0, ofGetWidth(), ofGetHeight());
+		break;
+	case GameScene::play:
+		for (auto it = this->targets.begin(); it != this->targets.end();)
+		{
+			(*it)->draw();
+			it++;
+		}
 
-	for (auto it = this->targets.begin(); it != this->targets.end();)
-	{
-		(*it)->draw();
-		it++;
-	}
+		if (attraction_or_repulsion && attraction_point) {
+			attraction_point->draw();
+		}
+		if (!attraction_or_repulsion && repulsion_point) {
+			repulsion_point->draw();
+		}
+		my_ship->draw();
+		break;
+	case GameScene::game_over:
+		for (auto it = this->targets.begin(); it != this->targets.end();)
+		{
+			(*it)->draw();
+			it++;
+		}
 
-	if (attraction_or_repulsion && attraction_point) {
-		attraction_point->draw();
+		if (attraction_or_repulsion && attraction_point) {
+			attraction_point->draw();
+		}
+		if (!attraction_or_repulsion && repulsion_point) {
+			repulsion_point->draw();
+		}
+		my_ship->draw();
+		break;
+	case GameScene::ending:
+		break;
+	default:
+		break;
 	}
-	if (!attraction_or_repulsion && repulsion_point) {
-		repulsion_point->draw();
-	}
-	my_ship->draw();
-
-
 
 	//-------side infos---------------
 	ofSetColor(0, 0, 0);
 	ofDrawRectangle(0, 0, setting_parameter->window_width / 5, setting_parameter->window_height);
 	ofSetColor(255, 255, 255);
 	ofDrawRectangle(0, 0, setting_parameter->window_width / 5 - 5, setting_parameter->window_height);
-
-	(is_transiting) ? ofSetColor(255, 10, 10) : ofSetColor(0, 0, 0);
-	char minute[3];
-	sprintf_s(minute, "%02d", finish_time / 3600);
-	char second[3];
-	sprintf_s(second, "%02d", (finish_time / 60) % 60);
-	char m_second[3];
-	sprintf_s(m_second, "%02d", (int)ofMap(finish_time % 60, 0, 60, 0, 99));
-	SourceHanSans->drawString("" + std::string(minute) + ":" + std::string(second) + "." + std::string(m_second), 30,100);
 
 	ofSetColor(0, 0, 0);
 	if (game_bgm->isPlaying())
@@ -171,16 +180,8 @@ void GameScene::draw()
 
 	ofDrawBitmapString(ofToString(ofGetFrameRate()) + "fps", 20, setting_parameter->window_height - 50);
 
-	//-------transition_out-----------
-	if (is_transiting)
-	{
-		ofSetColor(255, 255, 255, ofMap(transition_counter, 0, transition_time, 0, 255));
-		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
-	}
-	else
-	{
-		finish_time = counter;
-	}
+	timer->draw_time(30, 100, SourceHanSans);
+
 }
 
 void GameScene::keyPressed(int key) {
