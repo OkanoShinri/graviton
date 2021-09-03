@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "GameObject.h"
 #include "BackGroundImage.h"
+#include "Component.h"
 
 constexpr auto MAX_BULLETS_NUM = 3000;
 
@@ -23,17 +24,18 @@ public:
 	}
 private:
 	void draw();
-	void feadout(int mun) {};
 	void keyPressed(int key);
 	void keyReleased(int key);
 	void mouseMoved(int x, int y);
 	void mousePressed(int x, int y, int button);
 	void update();
 
+	enum State {
+		opening = 0, play, game_over, ending
+	};
+	State game_state;
+	std::unique_ptr<Timer> timer;
 	int counter = 0;
-	int finish_time = 0;
-	int transition_counter = 0;
-	int transition_time = 0;
 	bool can_change_scene = false;
 	bool is_transiting = false;
 	bool attraction_or_repulsion = false;
@@ -45,7 +47,7 @@ private:
 	std::list< std::unique_ptr<Target> > targets;
 	std::unique_ptr<ofSoundPlayer> game_bgm, shot_se;
 	SceneIdx next_scene = title_scene;
-	std::unique_ptr<ofTrueTypeFont> verdana;
+	std::shared_ptr<ofTrueTypeFont> SourceHanSans;
 };
 
 class GameScene2 :
@@ -87,5 +89,5 @@ private:
 	std::list< std::unique_ptr<Target> > targets;
 	std::unique_ptr<ofSoundPlayer> game_bgm, shot_se;
 	SceneIdx next_scene = title_scene;
-	std::unique_ptr<ofTrueTypeFont> verdana;
+	std::unique_ptr<ofTrueTypeFont> SourceHanSans;
 };

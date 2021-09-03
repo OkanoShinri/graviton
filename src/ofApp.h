@@ -32,4 +32,7 @@ public:
 		std::cout << "ofApp::exit()\n";
 	}
 	std::unique_ptr<Scene> sceneFactory(Scene::SceneIdx idx);
+
+protected:
+
 };
