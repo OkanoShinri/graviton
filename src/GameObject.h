@@ -15,6 +15,8 @@ public:
 
 	void update();
 	void move();
+	ofVec2f relative_move();
+	float relative_move_x();
 	void draw();
 	void addAttraction(ofVec2f attraction_pos);
 	void resetAttraction();
@@ -38,6 +40,9 @@ public:
 	~AttractionPoint() { std::cout << "Remove: AttractionPoint" << std::endl; }
 
 	void update() {};
+	void move(ofVec2f delta) {
+		pos += delta;
+	};
 	void draw();
 	void setPos(ofVec2f pos);
 	inline ofVec2f getPos() {
@@ -58,6 +63,9 @@ public:
 	~RepulsionPoint() { std::cout << "Remove: RepulsionPoint" << std::endl; }
 
 	void update() {};
+	void move(ofVec2f delta) {
+		pos += delta;
+	};
 	void draw();
 	void setPos(ofVec2f pos);
 	ofVec2f getPos() {
@@ -81,4 +89,18 @@ public:
 	bool canRemove() {
 		return can_remove;
 	};
+};
+
+class Wall {
+public:
+	Wall(int x, int y, int w, int h);
+	void draw();
+	void update();
+	void relative_move(ofVec2f delta);
+	bool canRemove() {
+		return pos.x < -100;
+	};
+private:
+	ofVec2f pos;
+	int width, height;
 };

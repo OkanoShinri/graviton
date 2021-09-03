@@ -13,9 +13,9 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	attraction_point.reset();
 	repulsion_point.reset();
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 1; i++)
 	{
-		targets.emplace_back(std::make_unique<Target>(i));
+		walls.emplace_back(std::make_unique<Wall>(500, 300, 60, 100));
 	}
 
 	game_state = opening;
@@ -58,41 +58,54 @@ void GameScene::update()
 		}
 		break;
 	case GameScene::play:
-		if (attraction_or_repulsion && attraction_point) {
-			my_ship->addAttraction(attraction_point->getPos());
+	{
+		if (counter % 120 == 0) {
+			walls.emplace_back(std::make_unique<Wall>(1400, 300, 60, 100));
+		}
+
+		ofVec2f delta = my_ship->relative_move();
+
+		if (attraction_point) {
+			attraction_point->move(-delta);
+			if (attraction_or_repulsion) {
+				my_ship->resetRepulsion();
+				my_ship->addAttraction(attraction_point->getPos());
+			}
 		}
 		else {
 			my_ship->resetAttraction();
 		}
-		if (!attraction_or_repulsion && repulsion_point) {
-			my_ship->addRepulsion(repulsion_point->getPos());
+		if (repulsion_point) {
+			repulsion_point->move(-delta);
+			if(!attraction_or_repulsion) {
+				my_ship->resetAttraction();
+				my_ship->addRepulsion(repulsion_point->getPos());
+			}
 		}
 		else {
 			my_ship->resetRepulsion();
 		}
 
-		my_ship->update();
-		my_ship->draw();
-
-		for (auto it = this->targets.begin(); it != this->targets.end();)
+		for (auto it = this->walls.begin(); it != this->walls.end();)
 		{
-			(*it)->update(my_ship->getPos());
+			(*it)->relative_move(-delta);
 			if ((*it)->canRemove())
 			{
-				it = this->targets.erase(it);
+				it = this->walls.erase(it);
 			}
 			else {
 				++it;
 			}
 		}
 
-		if (targets.empty())
+		if (walls.empty())
 		{
 			game_state = ending;
 			timer->stop();
 			counter = 0;
 		}
 		break;
+	}
 	case GameScene::game_over:
 		break;
 	case GameScene::ending:
@@ -125,7 +138,7 @@ void GameScene::draw()
 		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
 		break;
 	case GameScene::play:
-		for (auto it = this->targets.begin(); it != this->targets.end();)
+		for (auto it = this->walls.begin(); it != this->walls.end();)
 		{
 			(*it)->draw();
 			it++;
@@ -140,7 +153,7 @@ void GameScene::draw()
 		my_ship->draw();
 		break;
 	case GameScene::game_over:
-		for (auto it = this->targets.begin(); it != this->targets.end();)
+		for (auto it = this->walls.begin(); it != this->walls.end();)
 		{
 			(*it)->draw();
 			it++;
