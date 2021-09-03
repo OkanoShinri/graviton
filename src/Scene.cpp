@@ -11,6 +11,7 @@ TitleScene::TitleScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	can_change_scene = false;
 	next_scene = Scene::menu_scene;
 	game_state = TitleScene::opening;
+	counter = 0;
 
 	SourceHanSans = std::make_shared<ofTrueTypeFont>();
 	SourceHanSans_big = std::make_shared<ofTrueTypeFont>();
@@ -28,7 +29,7 @@ void TitleScene::update()
 	switch (game_state)
 	{
 	case TitleScene::opening:
-		if (counter > 0) {
+		if (counter == 60) {
 			game_state = TitleScene::play;
 			counter = 0;
 		}
@@ -36,7 +37,7 @@ void TitleScene::update()
 	case TitleScene::play:
 		break;
 	case TitleScene::ending:
-		if (counter == 60) {
+		if (counter >= 0) {
 			next_scene = Scene::menu_scene;
 			can_change_scene = true;
 		}
@@ -45,16 +46,37 @@ void TitleScene::update()
 		break;
 	}
 	counter++;
-
 }
 
 void TitleScene::draw()
 {
-	ofSetColor(255,255,255);
-	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-	ofSetColor(0, 0, 0);
-	SourceHanSans_big->drawString("graviton", 400, 300);
+	ofSetColor(255, 255, 255);
+	ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
+	switch (game_state)
+	{
+	case TitleScene::opening:
+	{
+		ofSetColor(0, 0, 0, ofMap(counter, 0, 60, 0, 255));
+		SourceHanSans_big->drawString("graviton", 370, 400);
+		std::string version = "ver ";
+		version += setting_parameter->version;
+		SourceHanSans->drawString(version, 850, 350);
 
+		break;
+	}
+	case TitleScene::play:
+	case TitleScene::ending:
+	{
+		ofSetColor(0, 0, 0);
+		SourceHanSans_big->drawString("graviton", 370, 400);
+		std::string version = "ver ";
+		version += setting_parameter->version;
+		SourceHanSans->drawString(version, 850, 350);
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 void TitleScene::keyPressed(int key) {
@@ -64,17 +86,26 @@ void TitleScene::keyPressed(int key) {
 	}
 }
 
+void TitleScene::mousePressed(int x, int y, int button)
+{
+	/*SourceHanSans_big->drawString("graviton", x, y);
+	std::string x_s, y_s;
+	x_s = std::to_string(x);
+	y_s = std::to_string(y);
+	ofDrawBitmapString("Quit:  " + x_s + "," + y_s, 600, 50);*/
+}
+
 MenuScene::MenuScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 {
 	setting_parameter = std::move(_setting_parameter);
-	transition_counter = 0;
-	transition_time = 60;
+
 	can_change_scene = false;
 	is_transiting = false;
 	next_scene = Scene::game_scene1;
 
 	choice_idx = 0;
-	push_counter = 0;
+	game_state = opening;
+	counter = 0;
 
 	std::vector<SceneIdx> data{ game_scene1,game_scene2 };
 	std::vector<std::string> data_str{ "room1","room2" };
@@ -92,110 +123,192 @@ MenuScene::~MenuScene()
 	std::cout << "Remove: TitleScene" << std::endl;
 }
 
+void MenuScene::mousePressed(int x, int y, int button)
+{
+	/*SourceHanSans->drawString("room1", x, y);
+	std::string x_s, y_s;
+	x_s = std::to_string(x);
+	y_s = std::to_string(y);
+	ofDrawBitmapString("Quit:  " + x_s + "," + y_s, 600, 50);*/
+}
+
 void MenuScene::update()
 {
-	if (is_transiting) {
-		if (transition_counter < transition_time) {
-			transition_counter++;
+	ofSetColor(255, 255, 255);
+	ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
+	ofSetColor(0, 0, 0);
+
+	switch (game_state)
+	{
+	case MenuScene::opening:
+		if (counter > 60) {
+			game_state = MenuScene::play;
+			counter = 0;
 		}
-		else {
+		break;
+	case MenuScene::play:
+		switch (choice_idx)
+		{
+		case 0:
+			break;
+		case 1:
+			next_scene = setting_scene;
+			break;
+		case 2:
+			next_scene = quit_scene;
+			break;
+		default:
+			break;
+		}
+		break;
+	case MenuScene::ending:
+		if (counter == 60) {
 			can_change_scene = true;
 		}
-		return;
-	}
-
-
-	switch (choice_idx)
-	{
-	case 0:
-		this->next_scene = Scene::game_scene1;
-		break;
-	case 1:
-		this->next_scene = Scene::setting_scene;
-		break;
-	case 2:
-		this->next_scene = Scene::quit_scene;
 		break;
 	default:
 		break;
 	}
+	counter++;
 }
 
 void MenuScene::draw()
 {
-	ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
-	ofScale(setting_parameter->scale, setting_parameter->scale);
-
-
-	ofVec2f start_pos = ofVec2f(setting_parameter->window_width / 4, setting_parameter->window_height * 3 / 4);
-	ofVec2f setting_pos = ofVec2f(setting_parameter->window_width / 2, setting_parameter->window_height * 3 / 4);
-	ofVec2f quit_pos = ofVec2f(setting_parameter->window_width * 3 / 4, setting_parameter->window_height * 3 / 4);
-
-	ofSetColor(255, 255, 255);
-	ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
-
-	ofSetColor(0, 0, 0);
-	SourceHanSans_big->drawString("**Insert Title**", 400, 300);
-	std::string version = "ver ";
-	version += setting_parameter->version;
-	SourceHanSans->drawString(version, 850, 350);
-	SourceHanSans->drawString("Start", start_pos.x, start_pos.y);
-	SourceHanSans->drawString("Setting", setting_pos.x, setting_pos.y);
-	SourceHanSans->drawString("Quit", quit_pos.x, quit_pos.y);
-
-	game_selector->draw(400, 700, SourceHanSans);
-
-	int size_of_r = 15;
-	ofPushMatrix();
-	switch (choice_idx)
+	switch (game_state)
 	{
-	case 0:
-		ofTranslate(start_pos.x - 30, start_pos.y - size_of_r, 0);
-		break;
-	case 1:
-		ofTranslate(setting_pos.x - 30, setting_pos.y - size_of_r, 0);
-		break;
-	case 2:
-		ofTranslate(quit_pos.x - 30, quit_pos.y - size_of_r, 0);
-		break;
+	case MenuScene::opening:
+	{
+		ofSetColor(0, 0, 0);
+		SourceHanSans_big->drawString("graviton", 370, 300 + 100 * cos(counter / 60.0 *PI));
 
-	default:
+		ofSetColor(0, 0, 0, ofMap(counter, 0, 60, 0, 255));
+		game_selector->draw(455, 417, SourceHanSans);
+		SourceHanSans->drawString("Setting", 444, 550);
+		SourceHanSans->drawString("Quit", 467, 672);
+
+		int size_of_r = 15;
+		ofPushMatrix();
+		switch (choice_idx)
+		{
+		case 0:
+			ofTranslate(455 - 30, 417 - size_of_r, 0);
+			break;
+		case 1:
+			ofTranslate(444 - 30, 550 - size_of_r, 0);
+			break;
+		case 2:
+			ofTranslate(467 - 30, 672 - size_of_r, 0);
+			break;
+		default:
+			break;
+		}
+		ofNoFill();
+		ofSetLineWidth(1.0);
+		ofDrawCircle(0, 0, size_of_r);
+		ofFill();
+		ofDrawTriangle(size_of_r, 0, size_of_r * cos(2 * PI / 3), size_of_r * sin(2 * PI / 3), size_of_r * cos(-2 * PI / 3), size_of_r * sin(-2 * PI / 3));
+		ofPopMatrix();
 		break;
 	}
-	ofNoFill();
-	ofSetLineWidth(3.0);
-	ofDrawCircle(0, 0, size_of_r);
-	ofSetLineWidth(1.0);
-	ofFill();
-	ofDrawTriangle(size_of_r, 0, size_of_r * cos(2 * PI / 3), size_of_r * sin(2 * PI / 3), size_of_r * cos(-2 * PI / 3), size_of_r * sin(-2 * PI / 3));
-	ofPopMatrix();
-	//-------transition_out-----------
-	if (this->is_transiting)
+	case MenuScene::play:
 	{
-		ofSetColor(255, 255, 255, ofMap(transition_counter, 0, transition_time, 0, 255));
-		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
+		SourceHanSans_big->drawString("graviton", 370, 200);
+		game_selector->draw(455, 417, SourceHanSans);
+		SourceHanSans->drawString("Setting", 444, 550);
+		SourceHanSans->drawString("Quit", 467, 672);
+
+		int size_of_r = 15;
+		ofPushMatrix();
+		switch (choice_idx)
+		{
+		case 0:
+			ofTranslate(455 - 30, 417 - size_of_r, 0);
+			break;
+		case 1:
+			ofTranslate(444 - 30, 550 - size_of_r, 0);
+			break;
+		case 2:
+			ofTranslate(467 - 30, 672 - size_of_r, 0);
+			break;
+		default:
+			break;
+		}
+		ofNoFill();
+		ofSetLineWidth(1.0);
+		ofDrawCircle(0, 0, size_of_r);
+		ofFill();
+		ofDrawTriangle(size_of_r, 0, size_of_r * cos(2 * PI / 3), size_of_r * sin(2 * PI / 3), size_of_r * cos(-2 * PI / 3), size_of_r * sin(-2 * PI / 3));
+		ofPopMatrix();
+		break;
+	}
+	case MenuScene::ending:
+	{
+		ofSetColor(0, 0, 0, ofMap(counter, 0, 60, 255, 0));
+		SourceHanSans_big->drawString("graviton", 370, 200);
+		game_selector->draw(455, 417, SourceHanSans);
+		SourceHanSans->drawString("Setting", 444, 550);
+		SourceHanSans->drawString("Quit", 467, 672);
+
+		int size_of_r = 15;
+		ofPushMatrix();
+		switch (choice_idx)
+		{
+		case 0:
+			ofTranslate(455 - 30, 417 - size_of_r, 0);
+			break;
+		case 1:
+			ofTranslate(444 - 30, 550 - size_of_r, 0);
+			break;
+		case 2:
+			ofTranslate(467 - 30, 672 - size_of_r, 0);
+			break;
+		default:
+			break;
+		}
+		ofNoFill();
+		ofSetLineWidth(1.0);
+		ofDrawCircle(0, 0, size_of_r);
+		ofFill();
+		ofDrawTriangle(size_of_r, 0, size_of_r * cos(2 * PI / 3), size_of_r * sin(2 * PI / 3), size_of_r * cos(-2 * PI / 3), size_of_r * sin(-2 * PI / 3));
+		ofPopMatrix();
+		break;
+	}
+	default:
+		break;
 	}
 }
 
 void MenuScene::keyPressed(int key) {
-	if (this->is_transiting) {
+	if (game_state == ending) {
 		return;
 	}
 
 	switch (key) {
-	case OF_KEY_LEFT:
+	case OF_KEY_UP:
 		choice_idx = (choice_idx + 2) % 3;
 		break;
-	case OF_KEY_RIGHT:
+	case OF_KEY_DOWN:
 		choice_idx = (choice_idx + 1) % 3;
 		break;
+	case OF_KEY_LEFT:
+		if (choice_idx == 0) {
+			game_selector->change_left();
+		}
+		break;
+	case OF_KEY_RIGHT:
+		if (choice_idx == 0) {
+			game_selector->change_right();
+		}
+		break;
 	case OF_KEY_RETURN:
-		this->is_transiting = true;
-		this->transition_counter = 0;
+		if (choice_idx == 0) {
+			next_scene = game_selector->enter();
+		}
+		game_state = ending;
+		counter = 0;
 		break;
 	}
 }
-
 
 SettingScene::SettingScene(std::unique_ptr<SettingParameter> _setting_parameter)
 {
