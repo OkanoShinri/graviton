@@ -1,8 +1,7 @@
 #include "GameObject.h"
 
-
 MyShip::MyShip() :
-	counter(0), life(3), hit_anime_counter(0), radius(10.0),speed(1.0)
+	counter(0), life(3), hit_anime_counter(0), radius(3.0), speed(1.0)
 {
 	is_hit = false;
 	pos = ofVec2f(ofGetWidth() / 2, ofGetHeight() / 2);
@@ -35,7 +34,7 @@ void MyShip::move() {
 		vec.y = max_vec;
 	}
 
-	pos += vec*speed;
+	pos += vec * speed;
 
 	if (pos.x > ofGetWidth()) {
 		pos.x = ofGetWidth();
@@ -122,9 +121,9 @@ void MyShip::addAttraction(ofVec2f attraction_pos)
 		attraction.y = 0;
 		return;
 	}
-	float G = -0.1;
-	//attraction = G / (pos - attraction_pos).lengthSquared() * (pos - attraction_pos).getNormalized();
-	attraction = G * (pos - attraction_pos).getNormalized();
+	float G = -100;
+	attraction = G / (pos - attraction_pos).lengthSquared() * (pos - attraction_pos).getNormalized();
+	//attraction = G * (pos - attraction_pos).getNormalized();
 }
 
 void MyShip::resetAttraction()
@@ -139,9 +138,9 @@ void MyShip::addRepulsion(ofVec2f repulsion_pos)
 		repulsion.y = 0;
 		return;
 	}
-	float G = 0.1;
-	//repulsion = G / (pos - repulsion_pos).lengthSquared() * (pos - repulsion_pos).getNormalized();
-	repulsion = G * (pos - repulsion_pos).getNormalized();
+	float G = 100;
+	repulsion = G / (pos - repulsion_pos).lengthSquared() * (pos - repulsion_pos).getNormalized();
+	//repulsion = G * (pos - repulsion_pos).getNormalized();
 }
 
 void MyShip::resetRepulsion()
@@ -158,27 +157,53 @@ void MyShip::addStrongRepulsion(ofVec2f repulsion_pos)
 	repulsion = G / ((pos.x - repulsion_pos.x)*(pos.x - repulsion_pos.x) + (pos.y - repulsion_pos.y)*(pos.y - repulsion_pos.y)) * (pos - repulsion_pos).getNormalized();
 }
 
-bool MyShip::isHitLine(int x1, int y1, int x2, int y2)
+bool MyShip::isHitLine(float x1, float y1, float x2, float y2)
 {
 	bool is_hit = false;
 	if (y1 == y2 && (y1 > pos.y != y1 > pos.y + vec.y)) {
 		if (x1 < pos.x && pos.x < x2)
 		{
 			is_hit = true;
-			vec.y *= -1;
+			vec.y *= -1.1;
 		}
 	}
 	else if (x1 == x2 && (x1 > pos.x != x1 > pos.x + vec.x)) {
 		if (y1 < pos.y && pos.y < y2)
 		{
 			is_hit = true;
-			vec.x *= -1;
+			vec.x *= -1.1;
 		}
 	}
 	return is_hit;
 }
 
-AttractionPoint::AttractionPoint(float x, float y):
+bool MyShip::isHitBox(float x, float y, int w, int h)
+{
+	bool is_hit = false;
+	if (pos.x < x && y < pos.y&&pos.y < y + h && x < pos.x + vec.x)
+	{
+		is_hit = true;
+		vec.x *= -0.9;
+	}
+	else if (x + w < pos.x && y < pos.y&&pos.y < y + h && pos.x + vec.x < x + w)
+	{
+		is_hit = true;
+		vec.x *= -0.9;
+	}
+	else if (pos.y < y && x < pos.x&& pos.x < x + w && y < pos.y + vec.y)
+	{
+		is_hit = true;
+		vec.y *= -0.9;
+	}
+	else if (y + h < pos.y && x < pos.x&&pos.x < x + w && pos.y + vec.y < y + h)
+	{
+		is_hit = true;
+		vec.y *= -0.9;
+	}
+	return is_hit;
+}
+
+AttractionPoint::AttractionPoint(float x, float y) :
 	radius(10.0)
 {
 	pos = ofVec2f(x, y);
@@ -258,7 +283,6 @@ void Wall::draw()
 {
 	ofSetColor(0, 0, 0);
 	ofDrawLine(x1, y1, x2, y2);
-	
 }
 
 void Wall::update()
@@ -294,4 +318,3 @@ void Obstacle::relative_move(ofVec2f delta)
 {
 	pos += delta;
 }
-

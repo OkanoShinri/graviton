@@ -35,7 +35,8 @@ private:
 	};
 	State game_state;
 	std::unique_ptr<Timer> timer;
-	int counter = 0;
+	int counter;
+	float sum_x;
 	bool can_change_scene = false;
 	bool is_transiting = false;
 	bool attraction_or_repulsion = false;

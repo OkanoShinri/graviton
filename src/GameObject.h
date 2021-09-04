@@ -26,7 +26,8 @@ public:
 	inline ofVec2f getPos() {
 		return pos;
 	}
-	bool isHitLine(int x1, int y1, int x2, int y2);
+	bool isHitLine(float x1, float y1, float x2, float y2);
+	bool isHitBox(float x, float y, int w, int h);
 };
 
 class AttractionPoint
@@ -119,6 +120,10 @@ public:
 	bool canRemove() {
 		return pos.x < -100;
 	};
+	inline float getX() { return pos.x; };
+	inline float getY() { return pos.y; };
+	inline float getW() { return width; };
+	inline float getH() { return height; };
 private:
 	ofVec2f pos;
 	int width, height;

@@ -8,15 +8,18 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	is_transiting = false;
 
 	timer = std::make_unique<Timer>();
+	counter = 0;
+	sum_x = 0;
 
 	my_ship = std::make_unique<MyShip>();
 	attraction_point.reset();
 	repulsion_point.reset();
 
-	for (int i = 0; i < 1; i++)
-	{
-		walls.emplace_back(std::make_unique<Wall>(500, 100, 500, 400));
-	}
+	
+	walls.emplace_back(std::make_unique<Wall>(90, 50, 10500, 50));
+	walls.emplace_back(std::make_unique<Wall>(300, 40, 300, ofGetHeight() - 40));
+	walls.emplace_back(std::make_unique<Wall>(90, ofGetHeight() - 50, 10500, ofGetHeight() - 50));
+	
 
 	game_state = opening;
 
@@ -54,7 +57,7 @@ void GameScene::update()
 			game_state = play;
 			counter = 0;
 			timer->start();
-			game_bgm->play();
+			//game_bgm->play();
 		}
 		break;
 	case GameScene::play:
@@ -65,6 +68,7 @@ void GameScene::update()
 		}
 
 		ofVec2f delta = my_ship->relative_move();
+		sum_x += delta.x;
 
 		if (attraction_point) {
 			attraction_point->move(-delta);
@@ -90,9 +94,8 @@ void GameScene::update()
 		for (auto it = this->walls.begin(); it != this->walls.end();)
 		{
 			(*it)->relative_move(-delta);
-			if (my_ship->isHitLine((*it)->getX1(), (*it)->getY1(), (*it)->getX2(), (*it)->getY2())) {
-				(*it)->relative_move(-delta); //‚ß‚èž‚Ý–hŽ~
-			}
+			(my_ship->isHitLine((*it)->getX1(), (*it)->getY1(), (*it)->getX2(), (*it)->getY2()));
+			
 
 			if ((*it)->canRemove())
 			{
@@ -103,10 +106,11 @@ void GameScene::update()
 			}
 		}
 
-		/*
+		
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
 			(*it)->relative_move(-delta);
+			my_ship->isHitBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
 			if ((*it)->canRemove())
 			{
@@ -116,9 +120,9 @@ void GameScene::update()
 				++it;
 			}
 		}
-		*/
+		
 
-		if (walls.empty())
+		if (sum_x > 10000)
 		{
 			game_state = ending;
 			timer->stop();
@@ -154,8 +158,17 @@ void GameScene::draw()
 	switch (game_state)
 	{
 	case GameScene::opening:
-		ofSetColor(255, 255, 255, ofMap(counter, 0, 120, 255, 0));
-		ofDrawRectangle(0, 0, setting_parameter->window_width, setting_parameter->window_height);
+		ofSetColor(255, 255, 255, ofMap(counter, 0, 60, 0, 255));
+		for (auto it = this->walls.begin(); it != this->walls.end();)
+		{
+			(*it)->draw();
+			it++;
+		}
+		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
+		{
+			(*it)->draw();
+			it++;
+		}
 		break;
 	case GameScene::play:
 		for (auto it = this->walls.begin(); it != this->walls.end();)
@@ -193,6 +206,25 @@ void GameScene::draw()
 		my_ship->draw();
 		break;
 	case GameScene::ending:
+		ofSetColor(255, 255, 255, ofMap(counter, 0, 180, 255, 0));
+		for (auto it = this->walls.begin(); it != this->walls.end();)
+		{
+			(*it)->draw();
+			it++;
+		}
+		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
+		{
+			(*it)->draw();
+			it++;
+		}
+
+		if (attraction_or_repulsion && attraction_point) {
+			attraction_point->draw();
+		}
+		if (!attraction_or_repulsion && repulsion_point) {
+			repulsion_point->draw();
+		}
+		my_ship->draw();
 		break;
 	default:
 		break;
@@ -219,6 +251,11 @@ void GameScene::draw()
 	ofDrawBitmapString(ofToString(ofGetFrameRate()) + "fps", 20, setting_parameter->window_height - 50);
 
 	timer->drawTime(30, 100, SourceHanSans);
+
+	//std::string sum_x_str;
+	char sum_x_str[5];
+	sprintf_s(sum_x_str, "%d", int(sum_x / 10));
+	SourceHanSans->drawString(std::string(sum_x_str) + "m", 50, 300);
 
 }
 
