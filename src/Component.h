@@ -28,7 +28,7 @@ public:
 	void start() {
 		activate = true;
 	};
-	void draw_time(int x,int y, std::shared_ptr<ofTrueTypeFont> font) {
+	void drawTime(int x,int y, std::shared_ptr<ofTrueTypeFont> font) {
 		char minute[3];
 		sprintf_s(minute, "%02d", counter / 3600);
 		char second[3];
@@ -57,10 +57,10 @@ public:
 		choices_str = init_choices_str;
 		is_roop = roop;
 	};
-	inline void change_left() {
+	inline void changeLeft() {
 		choice_idx = (choice_idx - 1) % choices.size();
 	};
-	inline void change_right() {
+	inline void changeRight() {
 		choice_idx = (choice_idx + 1) % choices.size();
 	};
 	inline void draw(int x, int y, std::shared_ptr<ofTrueTypeFont> font) {
@@ -75,4 +75,8 @@ private:
 	std::vector<std::string> choices_str;
 	int counter, choice_idx;
 	bool is_roop;
+};
+
+class ObjectHitChecker {
+
 };

@@ -45,6 +45,7 @@ private:
 	std::unique_ptr<AttractionPoint> attraction_point;
 	std::unique_ptr<RepulsionPoint> repulsion_point;
 	std::list< std::unique_ptr<Wall> > walls;
+	std::list< std::unique_ptr<Obstacle> > obstacles;
 	std::unique_ptr<ofSoundPlayer> game_bgm, shot_se;
 	SceneIdx next_scene = title_scene;
 	std::shared_ptr<ofTrueTypeFont> SourceHanSans;

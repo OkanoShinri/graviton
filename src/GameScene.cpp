@@ -15,7 +15,7 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 
 	for (int i = 0; i < 1; i++)
 	{
-		walls.emplace_back(std::make_unique<Wall>(500, 300, 60, 100));
+		walls.emplace_back(std::make_unique<Wall>(500, 100, 500, 400));
 	}
 
 	game_state = opening;
@@ -50,7 +50,7 @@ void GameScene::update()
 	switch (game_state)
 	{
 	case GameScene::opening:
-		if (counter == 120) {
+		if (counter == 60) {
 			game_state = play;
 			counter = 0;
 			timer->start();
@@ -60,7 +60,8 @@ void GameScene::update()
 	case GameScene::play:
 	{
 		if (counter % 120 == 0) {
-			walls.emplace_back(std::make_unique<Wall>(1400, 300, 60, 100));
+			walls.emplace_back(std::make_unique<Wall>(1400, 300, 1400, 400));
+			obstacles.emplace_back(std::make_unique<Obstacle>(1400, 300, 100, 200));
 		}
 
 		ofVec2f delta = my_ship->relative_move();
@@ -89,6 +90,10 @@ void GameScene::update()
 		for (auto it = this->walls.begin(); it != this->walls.end();)
 		{
 			(*it)->relative_move(-delta);
+			if (my_ship->isHitLine((*it)->getX1(), (*it)->getY1(), (*it)->getX2(), (*it)->getY2())) {
+				(*it)->relative_move(-delta); //‚ß‚èž‚Ý–hŽ~
+			}
+
 			if ((*it)->canRemove())
 			{
 				it = this->walls.erase(it);
@@ -97,6 +102,21 @@ void GameScene::update()
 				++it;
 			}
 		}
+
+		/*
+		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
+		{
+			(*it)->relative_move(-delta);
+
+			if ((*it)->canRemove())
+			{
+				it = this->obstacles.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+		*/
 
 		if (walls.empty())
 		{
@@ -143,6 +163,11 @@ void GameScene::draw()
 			(*it)->draw();
 			it++;
 		}
+		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
+		{
+			(*it)->draw();
+			it++;
+		}
 
 		if (attraction_or_repulsion && attraction_point) {
 			attraction_point->draw();
@@ -177,7 +202,7 @@ void GameScene::draw()
 	ofSetColor(0, 0, 0);
 	ofDrawRectangle(0, 0, setting_parameter->window_width / 5, setting_parameter->window_height);
 	ofSetColor(255, 255, 255);
-	ofDrawRectangle(0, 0, setting_parameter->window_width / 5 - 5, setting_parameter->window_height);
+	ofDrawRectangle(0, 0, setting_parameter->window_width / 5 - 2, setting_parameter->window_height);
 
 	ofSetColor(0, 0, 0);
 	if (game_bgm->isPlaying())
@@ -193,7 +218,7 @@ void GameScene::draw()
 
 	ofDrawBitmapString(ofToString(ofGetFrameRate()) + "fps", 20, setting_parameter->window_height - 50);
 
-	timer->draw_time(30, 100, SourceHanSans);
+	timer->drawTime(30, 100, SourceHanSans);
 
 }
 
@@ -433,7 +458,7 @@ void GameScene2::draw()
 
 	ofDrawBitmapString(ofToString(ofGetFrameRate()) + "fps", 20, setting_parameter->window_height - 50);
 
-	timer->draw_time(30, 100, SourceHanSans);
+	timer->drawTime(30, 100, SourceHanSans);
 
 }
 

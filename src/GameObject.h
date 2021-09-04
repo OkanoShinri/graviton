@@ -26,6 +26,7 @@ public:
 	inline ofVec2f getPos() {
 		return pos;
 	}
+	bool isHitLine(int x1, int y1, int x2, int y2);
 };
 
 class AttractionPoint
@@ -93,7 +94,25 @@ public:
 
 class Wall {
 public:
-	Wall(int x, int y, int w, int h);
+	Wall(int x_1, int y_1, int x_2, int y_2);
+	void draw();
+	void update();
+	void relative_move(ofVec2f delta);
+	bool canRemove() {
+		return max(x1, x2) < -100;
+	};
+	inline float getX1() { return x1; };
+	inline float getY1() { return y1; };
+	inline float getX2() { return x2; };
+	inline float getY2() { return y2; };
+private:
+	//ofVec2f pos1, pos2;
+	float x1, y1, x2, y2;
+};
+
+class Obstacle {
+public:
+	Obstacle(int x, int y, int w, int h);
 	void draw();
 	void update();
 	void relative_move(ofVec2f delta);

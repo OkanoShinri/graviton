@@ -139,8 +139,9 @@ void MyShip::addRepulsion(ofVec2f repulsion_pos)
 		repulsion.y = 0;
 		return;
 	}
-	float G = 100.0;
-	repulsion = G / (pos - repulsion_pos).lengthSquared() * (pos - repulsion_pos).getNormalized();
+	float G = 0.1;
+	//repulsion = G / (pos - repulsion_pos).lengthSquared() * (pos - repulsion_pos).getNormalized();
+	repulsion = G * (pos - repulsion_pos).getNormalized();
 }
 
 void MyShip::resetRepulsion()
@@ -155,6 +156,26 @@ void MyShip::addStrongRepulsion(ofVec2f repulsion_pos)
 	}
 	float G = 100.0;
 	repulsion = G / ((pos.x - repulsion_pos.x)*(pos.x - repulsion_pos.x) + (pos.y - repulsion_pos.y)*(pos.y - repulsion_pos.y)) * (pos - repulsion_pos).getNormalized();
+}
+
+bool MyShip::isHitLine(int x1, int y1, int x2, int y2)
+{
+	bool is_hit = false;
+	if (y1 == y2 && (y1 > pos.y != y1 > pos.y + vec.y)) {
+		if (x1 < pos.x && pos.x < x2)
+		{
+			is_hit = true;
+			vec.y *= -1;
+		}
+	}
+	else if (x1 == x2 && (x1 > pos.x != x1 > pos.x + vec.x)) {
+		if (y1 < pos.y && pos.y < y2)
+		{
+			is_hit = true;
+			vec.x *= -1;
+		}
+	}
+	return is_hit;
 }
 
 AttractionPoint::AttractionPoint(float x, float y):
@@ -225,17 +246,19 @@ bool Target::is_hit(ofVec2f my_pos)
 	return pos.distance(my_pos) < radius;
 }
 
-Wall::Wall(int x, int y, int w, int h)
+Wall::Wall(int x_1, int y_1, int x_2, int y_2)
 {
-	pos = ofVec2f(x, y);
-	width = w;
-	height = h;
+	x1 = x_1;
+	y1 = y_1;
+	x2 = x_2;
+	y2 = y_2;
 }
 
 void Wall::draw()
 {
 	ofSetColor(0, 0, 0);
-	ofDrawRectangle(pos, width, height);
+	ofDrawLine(x1, y1, x2, y2);
+	
 }
 
 void Wall::update()
@@ -244,5 +267,31 @@ void Wall::update()
 
 void Wall::relative_move(ofVec2f delta)
 {
+	x1 += delta.x;
+	y1 += delta.y;
+	x2 += delta.x;
+	y2 += delta.y;
+}
+
+Obstacle::Obstacle(int x, int y, int w, int h)
+{
+	pos = ofVec2f(x, y);
+	width = w;
+	height = h;
+}
+
+void Obstacle::draw()
+{
+	ofSetColor(0, 0, 0);
+	ofDrawRectangle(pos, width, height);
+}
+
+void Obstacle::update()
+{
+}
+
+void Obstacle::relative_move(ofVec2f delta)
+{
 	pos += delta;
 }
+
