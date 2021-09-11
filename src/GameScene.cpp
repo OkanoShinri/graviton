@@ -20,6 +20,14 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	walls.emplace_back(std::make_unique<Wall>(300, 40, 300, ofGetHeight() - 40));
 	walls.emplace_back(std::make_unique<Wall>(90, ofGetHeight() - 50, 10500, ofGetHeight() - 50));
 	
+	cam.removeAllInteractions();
+	cam.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_XY, OF_MOUSE_BUTTON_LEFT);
+	cam.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
+
+	cam.enableOrtho();
+	cam.setNearClip(-1000000);
+	cam.setFarClip(1000000);
+	cam.setVFlip(true);
 
 	game_state = opening;
 
@@ -53,6 +61,7 @@ void GameScene::update()
 	switch (game_state)
 	{
 	case GameScene::opening:
+		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
 		if (counter == 60) {
 			game_state = play;
 			counter = 0;
@@ -67,11 +76,10 @@ void GameScene::update()
 			obstacles.emplace_back(std::make_unique<Obstacle>(1400, 300, 100, 200));
 		}
 
-		ofVec2f delta = my_ship->relative_move();
-		sum_x += delta.x;
+		my_ship->move();
+		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
 
 		if (attraction_point) {
-			attraction_point->move(-delta);
 			if (attraction_or_repulsion) {
 				my_ship->resetRepulsion();
 				my_ship->addAttraction(attraction_point->getPos());
@@ -81,7 +89,6 @@ void GameScene::update()
 			my_ship->resetAttraction();
 		}
 		if (repulsion_point) {
-			repulsion_point->move(-delta);
 			if(!attraction_or_repulsion) {
 				my_ship->resetAttraction();
 				my_ship->addRepulsion(repulsion_point->getPos());
@@ -93,8 +100,7 @@ void GameScene::update()
 
 		for (auto it = this->walls.begin(); it != this->walls.end();)
 		{
-			(*it)->relative_move(-delta);
-			(my_ship->isHitLine((*it)->getX1(), (*it)->getY1(), (*it)->getX2(), (*it)->getY2()));
+			my_ship->isHitLine((*it)->getX1(), (*it)->getY1(), (*it)->getX2(), (*it)->getY2());
 			
 
 			if ((*it)->canRemove())
@@ -109,7 +115,6 @@ void GameScene::update()
 		
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->relative_move(-delta);
 			my_ship->isHitBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
 			if ((*it)->canRemove())
@@ -149,12 +154,13 @@ void GameScene::update()
 void GameScene::draw()
 {
 	
+	
 	//ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
 	//ofScale(setting_parameter->scale, setting_parameter->scale);
 	//back_ground->draw();
 	ofSetColor(255, 255, 255);
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-
+	cam.begin();
 	switch (game_state)
 	{
 	case GameScene::opening:
@@ -229,6 +235,7 @@ void GameScene::draw()
 	default:
 		break;
 	}
+	cam.end();
 
 	//-------side infos---------------
 	ofSetColor(0, 0, 0);
@@ -257,6 +264,8 @@ void GameScene::draw()
 	sprintf_s(sum_x_str, "%d", int(sum_x / 10));
 	SourceHanSans->drawString(std::string(sum_x_str) + "m", 50, 300);
 
+
+	
 }
 
 void GameScene::keyPressed(int key) {
@@ -286,26 +295,26 @@ void GameScene::mousePressed(int x, int y, int button)
 		attraction_or_repulsion = !attraction_or_repulsion;
 		if (attraction_or_repulsion) {
 			if (!attraction_point) {
-				attraction_point = std::make_unique<AttractionPoint>(x, y);
+				attraction_point = std::make_unique<AttractionPoint>(my_ship->getPos().x - 512 + x, my_ship->getPos().y - 384 + y);
 			}
 			else if ((x - attraction_point->getPos().x)*(x - attraction_point->getPos().x) + (y - attraction_point->getPos().y)*(y - attraction_point->getPos().y) < 100) {
 				//attraction_point.reset();
 			}
 			else
 			{
-				attraction_point->setPos(x, y);
+				attraction_point->setPos(my_ship->getPos().x - 512 + x, my_ship->getPos().y - 384 + y);
 			}
 		}
 		else {
 			if (!repulsion_point) {
-				repulsion_point = std::make_unique<RepulsionPoint>(x, y);
+				repulsion_point = std::make_unique<RepulsionPoint>(my_ship->getPos().x - 512 + x, my_ship->getPos().y - 384 + y);
 			}
 			else if ((x - repulsion_point->getPos().x)*(x - repulsion_point->getPos().x) + (y - repulsion_point->getPos().y)*(y - repulsion_point->getPos().y) < 100) {
 				//repulsion_point.reset();
 			}
 			else
 			{
-				repulsion_point->setPos(x, y);
+				repulsion_point->setPos(my_ship->getPos().x - 512 + x, my_ship->getPos().y - 384 + y);
 			}
 		}
 	}

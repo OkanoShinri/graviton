@@ -14,9 +14,7 @@ public:
 	~MyShip() { std::cout << "Remove: MyShip" << std::endl; }
 
 	void update();
-	void move();
-	ofVec2f relative_move();
-	float relative_move_x();
+	ofVec2f move();
 	void draw();
 	void addAttraction(ofVec2f attraction_pos);
 	void resetAttraction();

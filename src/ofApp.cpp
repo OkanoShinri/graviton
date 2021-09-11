@@ -3,8 +3,8 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
 	ofSetFrameRate(60);
-	ofBackground(0);
-	ofSetBackgroundAuto(false);
+	ofBackground(255);
+	ofSetBackgroundAuto(true);
 
 	this->current_scene = sceneFactory(Scene::title_scene);
 }

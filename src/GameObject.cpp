@@ -16,7 +16,7 @@ void MyShip::update()
 	move();
 }
 
-void MyShip::move() {
+ofVec2f MyShip::move() {
 	force = (attraction + repulsion);
 	float max_vec = 4.0;
 	float min_vec = -max_vec;
@@ -36,76 +36,7 @@ void MyShip::move() {
 
 	pos += vec * speed;
 
-	if (pos.x > ofGetWidth()) {
-		pos.x = ofGetWidth();
-		vec.x *= -1;
-	}
-	else if (pos.x < ofGetWidth() / 5) {
-		pos.x = ofGetWidth() / 5;
-		vec.x *= -1;
-	}
-
-	if (pos.y > ofGetHeight()) {
-		pos.y = ofGetHeight();
-		vec.y *= -1;
-	}
-	else if (pos.y < 0) {
-		pos.y = 0;
-		vec.y *= -1;
-	}
-}
-ofVec2f MyShip::relative_move()
-{
-	force = (attraction + repulsion);
-	float max_vec = 4.0;
-	float min_vec = -max_vec;
-	vec += force;
-	if (vec.x < min_vec) {
-		vec.x = min_vec;
-	}
-	if (vec.x > max_vec) {
-		vec.x = max_vec;
-	}
-	if (vec.y < min_vec) {
-		vec.y = min_vec;
-	}
-	if (vec.y > max_vec) {
-		vec.y = max_vec;
-	}
-
-	return vec;
-}
-float MyShip::relative_move_x()
-{
-	force = (attraction + repulsion);
-	float max_vec = 4.0;
-	float min_vec = -max_vec;
-	vec += force;
-	if (vec.x < min_vec) {
-		vec.x = min_vec;
-	}
-	if (vec.x > max_vec) {
-		vec.x = max_vec;
-	}
-	if (vec.y < min_vec) {
-		vec.y = min_vec;
-	}
-	if (vec.y > max_vec) {
-		vec.y = max_vec;
-	}
-
-	pos.y += vec.y * speed;
-
-	if (pos.y > ofGetHeight()) {
-		pos.y = ofGetHeight();
-		vec.y *= -1;
-	}
-	else if (pos.y < 0) {
-		pos.y = 0;
-		vec.y *= -1;
-	}
-
-	return vec.x;
+	return pos;
 }
 
 void MyShip::draw()
@@ -121,9 +52,9 @@ void MyShip::addAttraction(ofVec2f attraction_pos)
 		attraction.y = 0;
 		return;
 	}
-	float G = -100;
+	float G = -0.1;
 	attraction = G / (pos - attraction_pos).lengthSquared() * (pos - attraction_pos).getNormalized();
-	//attraction = G * (pos - attraction_pos).getNormalized();
+	attraction = G * (pos - attraction_pos).getNormalized();
 }
 
 void MyShip::resetAttraction()
@@ -138,9 +69,9 @@ void MyShip::addRepulsion(ofVec2f repulsion_pos)
 		repulsion.y = 0;
 		return;
 	}
-	float G = 100;
+	float G = 0.1;
 	repulsion = G / (pos - repulsion_pos).lengthSquared() * (pos - repulsion_pos).getNormalized();
-	//repulsion = G * (pos - repulsion_pos).getNormalized();
+	repulsion = G * (pos - repulsion_pos).getNormalized();
 }
 
 void MyShip::resetRepulsion()
