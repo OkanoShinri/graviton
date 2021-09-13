@@ -18,7 +18,7 @@ void MyShip::update()
 
 ofVec2f MyShip::move() {
 	force = (attraction + repulsion);
-	float max_vec = 4.0;
+	float max_vec = 6.0;
 	float min_vec = -max_vec;
 	vec += force;
 	if (vec.x < min_vec) {
@@ -95,6 +95,7 @@ bool MyShip::isHitLine(float x1, float y1, float x2, float y2)
 		if (x1 < pos.x && pos.x < x2)
 		{
 			is_hit = true;
+			pos.y = y1;
 			vec.y *= -1.1;
 		}
 	}
@@ -102,6 +103,7 @@ bool MyShip::isHitLine(float x1, float y1, float x2, float y2)
 		if (y1 < pos.y && pos.y < y2)
 		{
 			is_hit = true;
+			pos.x = x1;
 			vec.x *= -1.1;
 		}
 	}
@@ -114,22 +116,45 @@ bool MyShip::isHitBox(float x, float y, int w, int h)
 	if (pos.x < x && y < pos.y&&pos.y < y + h && x < pos.x + vec.x)
 	{
 		is_hit = true;
-		vec.x *= -0.9;
+		vec.x *= -1.1;
 	}
 	else if (x + w < pos.x && y < pos.y&&pos.y < y + h && pos.x + vec.x < x + w)
 	{
 		is_hit = true;
-		vec.x *= -0.9;
+		vec.x *= -1.1;
 	}
 	else if (pos.y < y && x < pos.x&& pos.x < x + w && y < pos.y + vec.y)
 	{
 		is_hit = true;
-		vec.y *= -0.9;
+		vec.y *= -1.1;
 	}
 	else if (y + h < pos.y && x < pos.x&&pos.x < x + w && pos.y + vec.y < y + h)
 	{
 		is_hit = true;
-		vec.y *= -0.9;
+		vec.y *= -1.1;
+	}
+
+	//’†‚É‹‚½‚ç‰Ÿ‚µo‚µ‚Ä‚â‚é
+	if (x < pos.x && pos.x<x+w&& y < pos.y && pos.y < y + h)
+	{
+		int mindist = pos.x - x;
+		ofVec2f delta = ofVec2f(-mindist, 0);
+		if (x + w - pos.x < mindist) 
+		{
+			mindist = x + w - pos.x;
+			delta.set(mindist, 0);
+		}
+		if (pos.y-y < mindist)
+		{
+			mindist = pos.y - y;
+			delta.set(0, -mindist);
+		}
+		if (y + h - pos.y < mindist)
+		{
+			mindist = y + h - pos.y;
+			delta.set(mindist, 0);
+		}
+		pos += delta;
 	}
 	return is_hit;
 }
@@ -235,17 +260,50 @@ Obstacle::Obstacle(int x, int y, int w, int h)
 	height = h;
 }
 
-void Obstacle::draw()
+void Obstacle::draw(ofVec2f center_pos)
 {
+	if (pos.x + width < center_pos.x - 512 || center_pos.x + 512 < pos.x || pos.y + height < center_pos.y - 384 || center_pos.y + 384 < pos.y) {
+		return;
+	}
 	ofSetColor(0, 0, 0);
 	ofDrawRectangle(pos, width, height);
 }
 
-void Obstacle::update()
+void Obstacle::update(ofVec2f center_pos)
 {
 }
 
-void Obstacle::relative_move(ofVec2f delta)
+MovingObstacle::MovingObstacle(int x, int y, int w, int h, int movex1, int movey1):
+	counter(0), init_pos(ofVec2f(x, y))
 {
-	pos += delta;
+	pos = ofVec2f(x, y);
+	width = w;
+	height = h;
+	amplitude_x = abs(movex1 - x);
+	amplitude_y = abs(movey1 - y);
+
+	if (x == movex1 && y == movey1) {
+		move = false;
+	}
+	else {
+		move = true;
+	}
+}
+
+void MovingObstacle::draw(ofVec2f center_pos)
+{
+	Obstacle::draw(center_pos);
+}
+
+
+void MovingObstacle::update(ofVec2f center_pos)
+{
+	if (pos.x + width < center_pos.x - 512 || center_pos.x + 512 < pos.x || pos.y + height < center_pos.y - 384 || center_pos.y + 384 < pos.y) {
+		return;
+	}
+	if (move) {
+		pos.x = init_pos.x + (1 + amplitude_x * cos(counter / 100.0))*0.5;
+		pos.y = init_pos.y + (1 + amplitude_y * cos(counter / 100.0))*0.5;
+	}
+	counter++;
 }

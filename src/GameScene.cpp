@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include <stdio.h>
 
 GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 {
@@ -15,11 +16,17 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	attraction_point.reset();
 	repulsion_point.reset();
 
-	
-	walls.emplace_back(std::make_unique<Wall>(90, 50, 10500, 50));
-	walls.emplace_back(std::make_unique<Wall>(300, 40, 300, ofGetHeight() - 40));
-	walls.emplace_back(std::make_unique<Wall>(90, ofGetHeight() - 50, 10500, ofGetHeight() - 50));
-	
+	FILE *fp;
+	if ((fopen_s(&fp, "../bin/data/room1.csv", "r")) == 0)
+	{
+		int x, y, w, h, mx, my;
+		while (fscanf_s(fp, "%d,%d,%d,%d,%d,%d", &x, &y, &w, &h, &mx, &my) != EOF)
+		{
+			obstacles.emplace_back(std::make_unique<MovingObstacle>(x, y, w, h, mx, my));
+		}
+		fclose(fp);
+	}
+		
 	cam.removeAllInteractions();
 	cam.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_XY, OF_MOUSE_BUTTON_LEFT);
 	cam.addInteraction(ofEasyCam::TRANSFORM_TRANSLATE_Z, OF_MOUSE_BUTTON_RIGHT);
@@ -28,6 +35,9 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	cam.setNearClip(-1000000);
 	cam.setFarClip(1000000);
 	cam.setVFlip(true);
+
+	cam.disableMouseInput();
+	cam.disableMouseMiddleButton();
 
 	game_state = opening;
 
@@ -72,8 +82,8 @@ void GameScene::update()
 	case GameScene::play:
 	{
 		if (counter % 120 == 0) {
-			walls.emplace_back(std::make_unique<Wall>(1400, 300, 1400, 400));
-			obstacles.emplace_back(std::make_unique<Obstacle>(1400, 300, 100, 200));
+			//walls.emplace_back(std::make_unique<Wall>(1400, 300, 1400, 400));
+			//obstacles.emplace_back(std::make_unique<Obstacle>(1400, 300, 100, 200));
 		}
 
 		my_ship->move();
@@ -98,23 +108,9 @@ void GameScene::update()
 			my_ship->resetRepulsion();
 		}
 
-		for (auto it = this->walls.begin(); it != this->walls.end();)
-		{
-			my_ship->isHitLine((*it)->getX1(), (*it)->getY1(), (*it)->getX2(), (*it)->getY2());
-			
-
-			if ((*it)->canRemove())
-			{
-				it = this->walls.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-
-		
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
+			(*it)->update(my_ship->getPos());
 			my_ship->isHitBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
 			if ((*it)->canRemove())
@@ -165,26 +161,17 @@ void GameScene::draw()
 	{
 	case GameScene::opening:
 		ofSetColor(255, 255, 255, ofMap(counter, 0, 60, 0, 255));
-		for (auto it = this->walls.begin(); it != this->walls.end();)
-		{
-			(*it)->draw();
-			it++;
-		}
+
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->draw();
+			(*it)->draw(my_ship->getPos());
 			it++;
 		}
 		break;
 	case GameScene::play:
-		for (auto it = this->walls.begin(); it != this->walls.end();)
-		{
-			(*it)->draw();
-			it++;
-		}
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->draw();
+			(*it)->draw(my_ship->getPos());
 			it++;
 		}
 
@@ -197,12 +184,6 @@ void GameScene::draw()
 		my_ship->draw();
 		break;
 	case GameScene::game_over:
-		for (auto it = this->walls.begin(); it != this->walls.end();)
-		{
-			(*it)->draw();
-			it++;
-		}
-
 		if (attraction_or_repulsion && attraction_point) {
 			attraction_point->draw();
 		}
@@ -213,14 +194,9 @@ void GameScene::draw()
 		break;
 	case GameScene::ending:
 		ofSetColor(255, 255, 255, ofMap(counter, 0, 180, 255, 0));
-		for (auto it = this->walls.begin(); it != this->walls.end();)
-		{
-			(*it)->draw();
-			it++;
-		}
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->draw();
+			(*it)->draw(my_ship->getPos());
 			it++;
 		}
 

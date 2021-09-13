@@ -111,18 +111,34 @@ private:
 
 class Obstacle {
 public:
+	Obstacle() {};
 	Obstacle(int x, int y, int w, int h);
-	void draw();
-	void update();
-	void relative_move(ofVec2f delta);
+	virtual void draw(ofVec2f center_pos);
+	virtual void update(ofVec2f center_pos);
 	bool canRemove() {
-		return pos.x < -100;
+		return false;
 	};
-	inline float getX() { return pos.x; };
-	inline float getY() { return pos.y; };
-	inline float getW() { return width; };
-	inline float getH() { return height; };
-private:
+
+	inline float getX() { return this->pos.x; };
+	inline float getY() { return this->pos.y; };
+	inline int getW() { return this->width; };
+	inline int getH() { return this->height; };
+
+protected:
 	ofVec2f pos;
 	int width, height;
+};
+
+
+class MovingObstacle : public Obstacle {
+public:
+	MovingObstacle():counter(0) {};
+	MovingObstacle(int x, int y, int w, int h, int movex1, int movey1);
+	void draw(ofVec2f center_pos);
+	void update(ofVec2f center_pos);
+private:
+	bool move;
+	const ofVec2f init_pos;
+	int counter;
+	double amplitude_x, amplitude_y;
 };
