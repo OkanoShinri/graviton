@@ -16,14 +16,41 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	attraction_point.reset();
 	repulsion_point.reset();
 
+	int stage_map_width = 500;
+	int stage_map_height = 50;
 	FILE *fp;
 	if ((fopen_s(&fp, "../bin/data/room1.csv", "r")) == 0)
 	{
-		int x, y, w, h, mx, my;
-		while (fscanf_s(fp, "%d,%d,%d,%d,%d,%d", &x, &y, &w, &h, &mx, &my) != EOF)
-		{
-			obstacles.emplace_back(std::make_unique<MovingObstacle>(x, y, w, h, mx, my));
+		int map_x = 0, map_y = 0;
+		char block;
+		while ((block = fgetc(fp)) != EOF) {
+			switch (block)
+			{
+			case '0':
+				map_x++;
+				break;
+			case '1':
+				obstacles.emplace_back(std::make_unique<Obstacle>(map_x * 50, map_y * 50, 50, 50));
+				map_x++;
+				break;
+			case '2':
+				obstacles.emplace_back(std::make_unique<MovingObstacle>(map_x * 50, map_y * 50, 50, 50, map_x * 50 + 400, map_y * 50));
+				map_x++;
+				break;
+			case '3':
+				obstacles.emplace_back(std::make_unique<MovingObstacle>(map_x * 50, map_y * 50, 50, 50, map_x * 50, map_y * 50 + 400));
+				map_x++;
+				break;
+			case '\n':
+				map_x = 0;
+				map_y++;
+				break;
+			default:
+				
+				break;
+			}
 		}
+		std::cout << "FILE LOAD" << std::endl;
 		fclose(fp);
 	}
 		

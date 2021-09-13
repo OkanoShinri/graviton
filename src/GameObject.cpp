@@ -18,7 +18,7 @@ void MyShip::update()
 
 ofVec2f MyShip::move() {
 	force = (attraction + repulsion);
-	float max_vec = 6.0;
+	float max_vec = 3.0;
 	float min_vec = -max_vec;
 	vec += force;
 	if (vec.x < min_vec) {
@@ -276,7 +276,7 @@ void Obstacle::update(ofVec2f center_pos)
 MovingObstacle::MovingObstacle(int x, int y, int w, int h, int movex1, int movey1):
 	counter(0), init_pos(ofVec2f(x, y))
 {
-	pos = ofVec2f(x, y);
+	pos = ofVec2f(movex1, movey1);
 	width = w;
 	height = h;
 	amplitude_x = abs(movex1 - x);
