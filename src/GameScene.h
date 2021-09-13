@@ -47,7 +47,7 @@ private:
 	std::unique_ptr<AttractionPoint> attraction_point;
 	std::unique_ptr<BackGroundImage> back_ground;
 	std::unique_ptr<MyShip> my_ship;
-	std::unique_ptr<ofSoundPlayer> game_bgm, shot_se;
+	std::unique_ptr<ofSoundPlayer> game_bgm, att_clk_se, rep_clk_se;
 	std::unique_ptr<RepulsionPoint> repulsion_point;
 	std::unique_ptr<SettingParameter> setting_parameter;
 	std::unique_ptr<Timer> timer;

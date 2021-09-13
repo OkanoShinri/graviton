@@ -72,15 +72,18 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	SourceHanSans->load("SourceHanSans001.ttf", 30);
 	back_ground = std::make_unique<BackGroundImage>();
 
-	shot_se = std::make_unique<ofSoundPlayer>();
-	shot_se->load("shotse01.mp3");
-	shot_se->setVolume(setting_parameter->se_volume);
-	shot_se->setMultiPlay(true);
+	att_clk_se = std::make_unique<ofSoundPlayer>();
+	att_clk_se->load("マウス・シングルクリック02.mp3");
+	att_clk_se->setVolume(setting_parameter->se_volume);
+	att_clk_se->setMultiPlay(true);
+
+	rep_clk_se = std::make_unique<ofSoundPlayer>();
+	rep_clk_se->load("マウス・シングルクリック01.mp3");
+	rep_clk_se->setVolume(setting_parameter->se_volume);
+	rep_clk_se->setMultiPlay(true);
 
 	game_bgm = std::make_unique<ofSoundPlayer>();
-	std::string bgms[] = { "紫苑_-追憶-_2.mp3","ムスカリの花.mp3" };
-	int idx = std::rand() % 2;
-	game_bgm->load(bgms[idx]);
+	game_bgm->load("Blue_Ever.mp3");
 	game_bgm->setLoop(true);
 	game_bgm->setVolume(setting_parameter->bgm_volume);
 }
@@ -100,19 +103,14 @@ void GameScene::update()
 	case GameScene::opening:
 		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
 		if (counter == 60) {
-			game_state = play;
+			game_state = GameScene::play;
 			counter = 0;
 			timer->start();
-			//game_bgm->play();
+			game_bgm->play();
 		}
 		break;
 	case GameScene::play:
 	{
-		if (counter % 120 == 0) {
-			//walls.emplace_back(std::make_unique<Wall>(1400, 300, 1400, 400));
-			//obstacles.emplace_back(std::make_unique<Obstacle>(1400, 300, 100, 200));
-		}
-
 		my_ship->move();
 		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
 
@@ -152,13 +150,17 @@ void GameScene::update()
 
 		if (sum_x > 10000)
 		{
-			game_state = ending;
+			game_state = GameScene::ending;
 			timer->stop();
 			counter = 0;
 		}
 		break;
 	}
 	case GameScene::game_over:
+		game_bgm->setVolume(ofMap(counter, 0.0, 180, setting_parameter->bgm_volume, 0.0)); //180fでフェードアウト
+		if (counter == 180) {
+			can_change_scene = true;
+		}
 		break;
 	case GameScene::ending:
 		game_bgm->setVolume(ofMap(counter, 0.0, 180, setting_parameter->bgm_volume, 0.0)); //180fでフェードアウト
@@ -211,6 +213,12 @@ void GameScene::draw()
 		my_ship->draw();
 		break;
 	case GameScene::game_over:
+		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
+		{
+			(*it)->draw(my_ship->getPos());
+			it++;
+		}
+
 		if (attraction_or_repulsion && attraction_point) {
 			attraction_point->draw();
 		}
@@ -274,8 +282,8 @@ void GameScene::draw()
 void GameScene::keyPressed(int key) {
 	switch (key) {
 	case 'q':
-		next_scene = title_scene;
-		can_change_scene = true;
+		counter = 0;
+		game_state = GameScene::game_over;
 		break;
 	case 'r':
 		next_scene = game_scene1;
@@ -307,6 +315,7 @@ void GameScene::mousePressed(int x, int y, int button)
 			{
 				attraction_point->setPos(my_ship->getPos().x - 512 + x, my_ship->getPos().y - 384 + y);
 			}
+			att_clk_se->play();
 		}
 		else {
 			if (!repulsion_point) {
@@ -319,6 +328,7 @@ void GameScene::mousePressed(int x, int y, int button)
 			{
 				repulsion_point->setPos(my_ship->getPos().x - 512 + x, my_ship->getPos().y - 384 + y);
 			}
+			rep_clk_se->play();
 		}
 	}
 	else if (button == 2) {
