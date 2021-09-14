@@ -5,8 +5,8 @@ class MyShip
 {
 private:
 	bool is_hit;
-	int counter, life, hit_anime_counter;
-	float radius, speed;
+	int counter, life, hit_anime_counter, clear_area_w = 0, clear_area_h = 0;
+	float radius, speed, clear_area_x = 0, clear_area_y = 0;
 	ofVec2f pos, vec, attraction, repulsion, force;
 
 public:
@@ -24,8 +24,21 @@ public:
 	inline ofVec2f getPos() {
 		return pos;
 	}
+	void setClearArea(float x, float y, int w, int h) {
+		clear_area_x = x;
+		clear_area_y = y;
+		clear_area_w = w;
+		clear_area_h = h;
+	}
 	bool isHitLine(float x1, float y1, float x2, float y2);
 	bool isHitBox(float x, float y, int w, int h);
+	bool isInBox(float x, float y, int w, int h);
+	bool isClear() {
+		return  (clear_area_x < pos.x 
+			&& pos.x < clear_area_x + clear_area_w 
+			&& clear_area_y < pos.y 
+			&& pos.y < clear_area_y + clear_area_h);
+	}
 };
 
 class AttractionPoint

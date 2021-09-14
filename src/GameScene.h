@@ -40,7 +40,7 @@ private:
 	float sum_x;
 	int counter;
 	ofEasyCam cam;
-	SceneIdx next_scene = title_scene;
+	SceneIdx next_scene = game_scene2;
 	std::list< std::unique_ptr<Obstacle> > obstacles;
 	std::list< std::unique_ptr<Wall> > walls;
 	std::shared_ptr<ofTrueTypeFont> SourceHanSans;

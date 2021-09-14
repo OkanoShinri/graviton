@@ -41,6 +41,8 @@ ofVec2f MyShip::move() {
 
 void MyShip::draw()
 {
+	ofSetColor(20, 255, 20);
+	ofDrawRectangle(clear_area_x, clear_area_y, clear_area_w, clear_area_h);
 	ofSetColor(0, 0, 0);
 	ofDrawCircle(pos, radius);
 }
@@ -135,28 +137,38 @@ bool MyShip::isHitBox(float x, float y, int w, int h)
 	}
 
 	//中に居たら押し出してやる
-	if (x < pos.x && pos.x<x+w&& y < pos.y && pos.y < y + h)
+	if (isInBox(x, y, w, h))
 	{
-		int mindist = pos.x - x;
-		ofVec2f delta = ofVec2f(-mindist, 0);
+		float mindist = pos.x - x;
+		ofVec2f delta = ofVec2f(-mindist-2, 0);
 		if (x + w - pos.x < mindist) 
 		{
 			mindist = x + w - pos.x;
-			delta.set(mindist, 0);
+			delta.set(mindist+2, 0);
 		}
 		if (pos.y-y < mindist)
 		{
 			mindist = pos.y - y;
-			delta.set(0, -mindist);
+			delta.set(0, -mindist-2);
 		}
 		if (y + h - pos.y < mindist)
 		{
 			mindist = y + h - pos.y;
-			delta.set(mindist, 0);
+			delta.set(0, mindist + 2);
 		}
 		pos += delta;
+		vec = -vec;
+
+		//デバッグ用
+		assert(!isInBox(x, y, w, h));
 	}
+
 	return is_hit;
+}
+
+bool MyShip::isInBox(float x, float y, int w, int h)
+{
+	return (x < pos.x && pos.x < x + w && y < pos.y && pos.y < y + h);
 }
 
 AttractionPoint::AttractionPoint(float x, float y) :
@@ -302,8 +314,8 @@ void MovingObstacle::update(ofVec2f center_pos)
 		return;
 	}
 	if (move) {
-		pos.x = init_pos.x + (1 + amplitude_x * cos(counter / 100.0))*0.5;
-		pos.y = init_pos.y + (1 + amplitude_y * cos(counter / 100.0))*0.5;
+		pos.x = init_pos.x + amplitude_x * (1 + cos(counter / 100.0))*0.5;
+		pos.y = init_pos.y + amplitude_y * (1 + cos(counter / 100.0))*0.5;
 	}
 	counter++;
 }

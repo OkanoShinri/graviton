@@ -41,6 +41,10 @@ GameScene::GameScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 				obstacles.emplace_back(std::make_unique<MovingObstacle>(map_x * 50, map_y * 50, 50, 50, map_x * 50, map_y * 50 + 400));
 				map_x++;
 				break;
+			case '4':
+				my_ship->setClearArea(map_x * 50, map_y * 50, 50, 50);
+				map_x++;
+				break;
 			case '\n':
 				map_x = 0;
 				map_y++;
@@ -146,9 +150,20 @@ void GameScene::update()
 				++it;
 			}
 		}
-		
 
-		if (sum_x > 10000)
+		//is gameover
+		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
+		{
+			if (my_ship->isInBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH())) {
+				game_state = GameScene::game_over;
+				timer->stop();
+				counter = 0;
+				break;
+			}
+			++it;
+		}
+
+		if (my_ship->isClear())
 		{
 			game_state = GameScene::ending;
 			timer->stop();
@@ -157,12 +172,14 @@ void GameScene::update()
 		break;
 	}
 	case GameScene::game_over:
-		game_bgm->setVolume(ofMap(counter, 0.0, 180, setting_parameter->bgm_volume, 0.0)); //180fでフェードアウト
-		if (counter == 180) {
+		game_bgm->setVolume(ofMap(counter, 0.0, 90, setting_parameter->bgm_volume, 0.0)); //90fでフェードアウト
+		if (counter == 90) {
+			next_scene = GameScene::menu_scene;
 			can_change_scene = true;
 		}
 		break;
 	case GameScene::ending:
+		my_ship->move();
 		game_bgm->setVolume(ofMap(counter, 0.0, 180, setting_parameter->bgm_volume, 0.0)); //180fでフェードアウト
 		if (counter == 180) {
 			can_change_scene = true;
@@ -259,22 +276,22 @@ void GameScene::draw()
 	{
 		std::ostringstream bgm_param;
 		bgm_param << setting_parameter->bgm_volume;
-		ofDrawBitmapString("bgm: " + bgm_param.str(), 100, setting_parameter->window_height / 2);
+		ofDrawBitmapString("bgm: " + bgm_param.str(), 50, setting_parameter->window_height / 2 + 100);
 	}
 
 	std::ostringstream se_param;
 	se_param << setting_parameter->se_volume;
-	ofDrawBitmapString("se:  " + se_param.str(), 100, setting_parameter->window_height / 2 + 50);
+	ofDrawBitmapString("se:  " + se_param.str(), 50, setting_parameter->window_height / 2 + 150);
 
 	ofDrawBitmapString(ofToString(ofGetFrameRate()) + "fps", 20, setting_parameter->window_height - 50);
 
 	timer->drawTime(30, 100, SourceHanSans);
 
-	//std::string sum_x_str;
+	/*
 	char sum_x_str[5];
 	sprintf_s(sum_x_str, "%d", int(sum_x / 10));
 	SourceHanSans->drawString(std::string(sum_x_str) + "m", 50, 300);
-
+	*/
 
 	
 }
@@ -524,7 +541,7 @@ void GameScene2::draw()
 void GameScene2::keyPressed(int key) {
 	switch (key) {
 	case 'q':
-		next_scene = title_scene;
+		next_scene = menu_scene;
 		can_change_scene = true;
 		break;
 	case 'r':
