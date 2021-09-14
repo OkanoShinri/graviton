@@ -1,8 +1,7 @@
 #include "GameObject.h"
 
-
 MyShip::MyShip() :
-	counter(0), life(3), hit_anime_counter(0), radius(10.0),speed(1.0)
+	counter(0), life(3), hit_anime_counter(0), radius(3.0), speed(1.0)
 {
 	is_hit = false;
 	pos = ofVec2f(ofGetWidth() / 2, ofGetHeight() / 2);
@@ -17,9 +16,9 @@ void MyShip::update()
 	move();
 }
 
-void MyShip::move() {
+ofVec2f MyShip::move() {
 	force = (attraction + repulsion);
-	float max_vec = 4.0;
+	float max_vec = 3.0;
 	float min_vec = -max_vec;
 	vec += force;
 	if (vec.x < min_vec) {
@@ -35,29 +34,15 @@ void MyShip::move() {
 		vec.y = max_vec;
 	}
 
-	pos += vec*speed;
+	pos += vec * speed;
 
-	if (pos.x > ofGetWidth()) {
-		pos.x = ofGetWidth();
-		vec.x *= -1;
-	}
-	else if (pos.x < ofGetWidth() / 5) {
-		pos.x = ofGetWidth() / 5;
-		vec.x *= -1;
-	}
-
-	if (pos.y > ofGetHeight()) {
-		pos.y = ofGetHeight();
-		vec.y *= -1;
-	}
-	else if (pos.y < 0) {
-		pos.y = 0;
-		vec.y *= -1;
-	}
+	return pos;
 }
 
 void MyShip::draw()
 {
+	ofSetColor(20, 255, 20);
+	ofDrawRectangle(clear_area_x, clear_area_y, clear_area_w, clear_area_h);
 	ofSetColor(0, 0, 0);
 	ofDrawCircle(pos, radius);
 }
@@ -65,10 +50,13 @@ void MyShip::draw()
 void MyShip::addAttraction(ofVec2f attraction_pos)
 {
 	if ((pos - attraction_pos).length() < 10) {
+		attraction.x = 0;
+		attraction.y = 0;
 		return;
 	}
-	float G = -10.0;
-	attraction = G / ((pos.x - attraction_pos.x)*(pos.x - attraction_pos.x) + (pos.y - attraction_pos.y)*(pos.y - attraction_pos.y)) * (pos - attraction_pos);
+	float G = -0.1;
+	attraction = G / (pos - attraction_pos).lengthSquared() * (pos - attraction_pos).getNormalized();
+	attraction = G * (pos - attraction_pos).getNormalized();
 }
 
 void MyShip::resetAttraction()
@@ -79,10 +67,13 @@ void MyShip::resetAttraction()
 void MyShip::addRepulsion(ofVec2f repulsion_pos)
 {
 	if ((pos - repulsion_pos).length() < 10) {
+		repulsion.x = 0;
+		repulsion.y = 0;
 		return;
 	}
-	float G = 10.0;
-	repulsion = G / ((pos.x - repulsion_pos.x)*(pos.x - repulsion_pos.x) + (pos.y - repulsion_pos.y)*(pos.y - repulsion_pos.y)) * (pos - repulsion_pos);
+	float G = 0.1;
+	repulsion = G / (pos - repulsion_pos).lengthSquared() * (pos - repulsion_pos).getNormalized();
+	repulsion = G * (pos - repulsion_pos).getNormalized();
 }
 
 void MyShip::resetRepulsion()
@@ -96,10 +87,91 @@ void MyShip::addStrongRepulsion(ofVec2f repulsion_pos)
 		return;
 	}
 	float G = 100.0;
-	repulsion = G / ((pos.x - repulsion_pos.x)*(pos.x - repulsion_pos.x) + (pos.y - repulsion_pos.y)*(pos.y - repulsion_pos.y)) * (pos - repulsion_pos);
+	repulsion = G / ((pos.x - repulsion_pos.x)*(pos.x - repulsion_pos.x) + (pos.y - repulsion_pos.y)*(pos.y - repulsion_pos.y)) * (pos - repulsion_pos).getNormalized();
 }
 
-AttractionPoint::AttractionPoint(float x, float y):
+bool MyShip::isHitLine(float x1, float y1, float x2, float y2)
+{
+	bool is_hit = false;
+	if (y1 == y2 && (y1 > pos.y != y1 > pos.y + vec.y)) {
+		if (x1 < pos.x && pos.x < x2)
+		{
+			is_hit = true;
+			pos.y = y1;
+			vec.y *= -1.1;
+		}
+	}
+	else if (x1 == x2 && (x1 > pos.x != x1 > pos.x + vec.x)) {
+		if (y1 < pos.y && pos.y < y2)
+		{
+			is_hit = true;
+			pos.x = x1;
+			vec.x *= -1.1;
+		}
+	}
+	return is_hit;
+}
+
+bool MyShip::isHitBox(float x, float y, int w, int h)
+{
+	bool is_hit = false;
+	if (pos.x < x && y < pos.y&&pos.y < y + h && x < pos.x + vec.x)
+	{
+		is_hit = true;
+		vec.x *= -1.1;
+	}
+	else if (x + w < pos.x && y < pos.y&&pos.y < y + h && pos.x + vec.x < x + w)
+	{
+		is_hit = true;
+		vec.x *= -1.1;
+	}
+	else if (pos.y < y && x < pos.x&& pos.x < x + w && y < pos.y + vec.y)
+	{
+		is_hit = true;
+		vec.y *= -1.1;
+	}
+	else if (y + h < pos.y && x < pos.x&&pos.x < x + w && pos.y + vec.y < y + h)
+	{
+		is_hit = true;
+		vec.y *= -1.1;
+	}
+
+	//中に居たら押し出してやる
+	if (isInBox(x, y, w, h))
+	{
+		float mindist = pos.x - x;
+		ofVec2f delta = ofVec2f(-mindist-2, 0);
+		if (x + w - pos.x < mindist) 
+		{
+			mindist = x + w - pos.x;
+			delta.set(mindist+2, 0);
+		}
+		if (pos.y-y < mindist)
+		{
+			mindist = pos.y - y;
+			delta.set(0, -mindist-2);
+		}
+		if (y + h - pos.y < mindist)
+		{
+			mindist = y + h - pos.y;
+			delta.set(0, mindist + 2);
+		}
+		pos += delta;
+		vec = -vec;
+
+		//デバッグ用
+		assert(!isInBox(x, y, w, h));
+	}
+
+	return is_hit;
+}
+
+bool MyShip::isInBox(float x, float y, int w, int h)
+{
+	return (x < pos.x && pos.x < x + w && y < pos.y && pos.y < y + h);
+}
+
+AttractionPoint::AttractionPoint(float x, float y) :
 	radius(10.0)
 {
 	pos = ofVec2f(x, y);
@@ -165,4 +237,85 @@ void Target::draw()
 bool Target::is_hit(ofVec2f my_pos)
 {
 	return pos.distance(my_pos) < radius;
+}
+
+Wall::Wall(int x_1, int y_1, int x_2, int y_2)
+{
+	x1 = x_1;
+	y1 = y_1;
+	x2 = x_2;
+	y2 = y_2;
+}
+
+void Wall::draw()
+{
+	ofSetColor(0, 0, 0);
+	ofDrawLine(x1, y1, x2, y2);
+}
+
+void Wall::update()
+{
+}
+
+void Wall::relative_move(ofVec2f delta)
+{
+	x1 += delta.x;
+	y1 += delta.y;
+	x2 += delta.x;
+	y2 += delta.y;
+}
+
+Obstacle::Obstacle(int x, int y, int w, int h)
+{
+	pos = ofVec2f(x, y);
+	width = w;
+	height = h;
+}
+
+void Obstacle::draw(ofVec2f center_pos)
+{
+	if (pos.x + width < center_pos.x - 512 || center_pos.x + 512 < pos.x || pos.y + height < center_pos.y - 384 || center_pos.y + 384 < pos.y) {
+		return;
+	}
+	ofSetColor(0, 0, 0);
+	ofDrawRectangle(pos, width, height);
+}
+
+void Obstacle::update(ofVec2f center_pos)
+{
+}
+
+MovingObstacle::MovingObstacle(int x, int y, int w, int h, int movex1, int movey1):
+	counter(0), init_pos(ofVec2f(x, y))
+{
+	pos = ofVec2f(movex1, movey1);
+	width = w;
+	height = h;
+	amplitude_x = abs(movex1 - x);
+	amplitude_y = abs(movey1 - y);
+
+	if (x == movex1 && y == movey1) {
+		move = false;
+	}
+	else {
+		move = true;
+	}
+}
+
+void MovingObstacle::draw(ofVec2f center_pos)
+{
+	Obstacle::draw(center_pos);
+}
+
+
+void MovingObstacle::update(ofVec2f center_pos)
+{
+	if (pos.x + width < center_pos.x - 512 || center_pos.x + 512 < pos.x || pos.y + height < center_pos.y - 384 || center_pos.y + 384 < pos.y) {
+		return;
+	}
+	if (move) {
+		pos.x = init_pos.x + amplitude_x * (1 + cos(counter / 100.0))*0.5;
+		pos.y = init_pos.y + amplitude_y * (1 + cos(counter / 100.0))*0.5;
+	}
+	counter++;
 }

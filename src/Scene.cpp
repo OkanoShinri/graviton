@@ -292,12 +292,12 @@ void MenuScene::keyPressed(int key) {
 		break;
 	case OF_KEY_LEFT:
 		if (choice_idx == 0) {
-			game_selector->change_left();
+			game_selector->changeLeft();
 		}
 		break;
 	case OF_KEY_RIGHT:
 		if (choice_idx == 0) {
-			game_selector->change_right();
+			game_selector->changeRight();
 		}
 		break;
 	case OF_KEY_RETURN:
