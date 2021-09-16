@@ -9,7 +9,7 @@
 class Scene {
 public:
 	enum SceneIdx {
-		quit_scene = 0, title_scene, menu_scene, setting_scene, game_scene1, game_scene2
+		quit_scene = 0, title_scene, menu_scene, setting_scene, game_scene01, game_scene02, game_scene03, game_scene04, game_scene05
 	};
 
 	virtual ~Scene() {};
@@ -103,7 +103,7 @@ private:
 
 	std::shared_ptr<ofTrueTypeFont> SourceHanSans, SourceHanSans_big;
 	std::unique_ptr<SettingParameter> setting_parameter;
-	SceneIdx next_scene = game_scene1;
+	SceneIdx next_scene = game_scene01;
 	std::unique_ptr<Selector<SceneIdx>> game_selector;
 };
 
