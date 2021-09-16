@@ -118,9 +118,6 @@ void GameScene01::update()
 		break;
 	case GameScene01::play:
 	{
-		my_ship->move();
-		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
-
 		if (attraction_point) {
 			if (attraction_or_repulsion) {
 				my_ship->resetRepulsion();
@@ -131,7 +128,7 @@ void GameScene01::update()
 			my_ship->resetAttraction();
 		}
 		if (repulsion_point) {
-			if(!attraction_or_repulsion) {
+			if (!attraction_or_repulsion) {
 				my_ship->resetAttraction();
 				my_ship->addRepulsion(repulsion_point->getPos());
 			}
@@ -140,10 +137,12 @@ void GameScene01::update()
 			my_ship->resetRepulsion();
 		}
 
+		my_ship->simulate_move();
+
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
 			(*it)->update(my_ship->getPos());
-			my_ship->isHitBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
+			my_ship->getBoxIntersection((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
 			if ((*it)->canRemove())
 			{
@@ -154,10 +153,13 @@ void GameScene01::update()
 			}
 		}
 
+		my_ship->update();
+		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
+
 		//is gameover
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			if (my_ship->isInBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH())) {
+			if (my_ship->isInBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH(), my_ship->getPos().x, my_ship->getPos().y)) {
 				game_state = GameScene01::game_over;
 				timer->stop();
 				counter = 0;
@@ -322,6 +324,10 @@ void GameScene01::mouseMoved(int x, int y)
 
 void GameScene01::mousePressed(int x, int y, int button)
 {
+	if (game_state != play) {
+		return;
+	}
+
 	if (button == 0) {
 		attraction_or_repulsion = !attraction_or_repulsion;
 		if (attraction_or_repulsion) {
@@ -373,6 +379,8 @@ GameScene02::GameScene02(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	sum_x = 0;
 
 	my_ship = std::make_unique<MyShip>();
+	my_ship->setSpeedRate(1.5);
+	my_ship->setMaxSpeed(4.0);
 	attraction_point.reset();
 	repulsion_point.reset();
 
@@ -475,9 +483,6 @@ void GameScene02::update()
 		break;
 	case GameScene02::play:
 	{
-		my_ship->move();
-		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
-
 		if (attraction_point) {
 			if (attraction_or_repulsion) {
 				my_ship->resetRepulsion();
@@ -497,10 +502,12 @@ void GameScene02::update()
 			my_ship->resetRepulsion();
 		}
 
+		my_ship->simulate_move();
+
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
 			(*it)->update(my_ship->getPos());
-			my_ship->isHitBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
+			my_ship->getBoxIntersection((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
 			if ((*it)->canRemove())
 			{
@@ -511,10 +518,13 @@ void GameScene02::update()
 			}
 		}
 
+		my_ship->update();
+		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
+
 		//is gameover
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			if (my_ship->isInBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH())) {
+			if (my_ship->isInBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH(), my_ship->getPos().x, my_ship->getPos().y)) {
 				game_state = GameScene02::game_over;
 				timer->stop();
 				counter = 0;
@@ -679,6 +689,10 @@ void GameScene02::mouseMoved(int x, int y)
 
 void GameScene02::mousePressed(int x, int y, int button)
 {
+	if (game_state != play) {
+		return;
+	}
+
 	if (button == 0) {
 		attraction_or_repulsion = !attraction_or_repulsion;
 		if (attraction_or_repulsion) {

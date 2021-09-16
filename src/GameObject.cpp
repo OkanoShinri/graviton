@@ -1,11 +1,12 @@
 #include "GameObject.h"
 
 MyShip::MyShip() :
-	counter(0), life(3), hit_anime_counter(0), radius(3.0), speed(1.0)
+	counter(0), life(3), hit_anime_counter(0), radius(3.f), speed_rate(1.f), max_speed(3.f),
+	delta_x_in_box(false),delta_y_in_box(false),delta_pos_in_box(false)
 {
-	is_hit = false;
+
 	pos = ofVec2f(ofGetWidth() / 2, ofGetHeight() / 2);
-	vec = ofVec2f(0, 0);
+	velocity = ofVec2f(0, 0);
 	resetAttraction();
 	resetRepulsion();
 	force = ofVec2f(0, 0);
@@ -14,33 +15,51 @@ MyShip::MyShip() :
 void MyShip::update()
 {
 	move();
+	delta_x_in_box = false;
+	delta_y_in_box = false;
+	delta_pos_in_box = false;
 }
 
 ofVec2f MyShip::move() {
-	force = (attraction + repulsion);
-	float max_vec = 3.0;
-	float min_vec = -max_vec;
-	vec += force;
-	if (vec.x < min_vec) {
-		vec.x = min_vec;
+	
+	if (delta_x_in_box && delta_y_in_box) {
+		velocity = -velocity;
 	}
-	if (vec.x > max_vec) {
-		vec.x = max_vec;
+	else if (delta_x_in_box) {
+		velocity.x = -velocity.x;
 	}
-	if (vec.y < min_vec) {
-		vec.y = min_vec;
+	else if (delta_y_in_box) {
+		velocity.y = -velocity.y;
 	}
-	if (vec.y > max_vec) {
-		vec.y = max_vec;
+	else if (delta_pos_in_box) {
+		velocity = -velocity;
 	}
-
-	pos += vec * speed;
+	
+	pos += velocity;
 
 	return pos;
 }
 
-void MyShip::draw()
+void MyShip::simulate_move()
 {
+	force = (attraction + repulsion);
+	velocity += force;
+	if (velocity.x < -max_speed) {
+		velocity.x = -max_speed;
+	}
+	if (velocity.x > max_speed) {
+		velocity.x = max_speed;
+	}
+	if (velocity.y < -max_speed) {
+		velocity.y = -max_speed;
+	}
+	if (velocity.y > max_speed) {
+		velocity.y = max_speed;
+	}
+}
+
+void MyShip::draw() const
+{ 
 	ofSetColor(20, 255, 20);
 	ofDrawRectangle(clear_area_x, clear_area_y, clear_area_w, clear_area_h);
 	ofSetColor(0, 0, 0);
@@ -90,66 +109,45 @@ void MyShip::addStrongRepulsion(ofVec2f repulsion_pos)
 	repulsion = G / ((pos.x - repulsion_pos.x)*(pos.x - repulsion_pos.x) + (pos.y - repulsion_pos.y)*(pos.y - repulsion_pos.y)) * (pos - repulsion_pos).getNormalized();
 }
 
-bool MyShip::isHitLine(float x1, float y1, float x2, float y2)
+bool MyShip::getBoxIntersection(float x, float y, int w, int h)
 {
-	bool is_hit = false;
-	if (y1 == y2 && (y1 > pos.y != y1 > pos.y + vec.y)) {
-		if (x1 < pos.x && pos.x < x2)
-		{
-			is_hit = true;
-			pos.y = y1;
-			vec.y *= -1.1;
-		}
-	}
-	else if (x1 == x2 && (x1 > pos.x != x1 > pos.x + vec.x)) {
-		if (y1 < pos.y && pos.y < y2)
-		{
-			is_hit = true;
-			pos.x = x1;
-			vec.x *= -1.1;
-		}
-	}
-	return is_hit;
-}
+	x -= 1;
+	y -= 1;
+	w += 2;
+	h += 2;
 
-bool MyShip::isHitBox(float x, float y, int w, int h)
-{
-	bool is_hit = false;
-	if (pos.x < x && y < pos.y&&pos.y < y + h && x < pos.x + vec.x)
+	bool hit = false;
+	if (isInBox(x, y, w, h, pos.x + velocity.x, pos.y) || isInBox(x, y, w, h, pos.x - velocity.x, pos.y))
 	{
-		is_hit = true;
-		vec.x *= -1.1;
+		hit = true;
+		delta_x_in_box = true;
 	}
-	else if (x + w < pos.x && y < pos.y&&pos.y < y + h && pos.x + vec.x < x + w)
+	else if (isInBox(x, y, w, h, pos.x, pos.y + velocity.y) || isInBox(x, y, w, h, pos.x, pos.y - velocity.y))
 	{
-		is_hit = true;
-		vec.x *= -1.1;
+		hit = true;
+		delta_y_in_box = true;
 	}
-	else if (pos.y < y && x < pos.x&& pos.x < x + w && y < pos.y + vec.y)
+	else if (isInBox(x, y, w, h, pos.x + velocity.x, pos.y + velocity.y))
 	{
-		is_hit = true;
-		vec.y *= -1.1;
+		hit = true;
+		delta_pos_in_box = true;
 	}
-	else if (y + h < pos.y && x < pos.x&&pos.x < x + w && pos.y + vec.y < y + h)
-	{
-		is_hit = true;
-		vec.y *= -1.1;
-	}
+
 
 	//中に居たら押し出してやる
-	if (isInBox(x, y, w, h))
+	if (isInBox(x, y, w, h, pos.x, pos.y))
 	{
 		float mindist = pos.x - x;
-		ofVec2f delta = ofVec2f(-mindist-2, 0);
-		if (x + w - pos.x < mindist) 
+		ofVec2f delta = ofVec2f(-mindist - 2, 0);
+		if (x + w - pos.x < mindist)
 		{
 			mindist = x + w - pos.x;
-			delta.set(mindist+2, 0);
+			delta.set(mindist + 2, 0);
 		}
-		if (pos.y-y < mindist)
+		if (pos.y - y < mindist)
 		{
 			mindist = pos.y - y;
-			delta.set(0, -mindist-2);
+			delta.set(0, -mindist - 2);
 		}
 		if (y + h - pos.y < mindist)
 		{
@@ -157,19 +155,14 @@ bool MyShip::isHitBox(float x, float y, int w, int h)
 			delta.set(0, mindist + 2);
 		}
 		pos += delta;
-		vec = -vec;
 
 		//デバッグ用
-		assert(!isInBox(x, y, w, h));
+		assert(!isInBox(x, y, w, h, pos.x, pos.y));
 	}
 
-	return is_hit;
+	return hit;
 }
 
-bool MyShip::isInBox(float x, float y, int w, int h)
-{
-	return (x < pos.x && pos.x < x + w && y < pos.y && pos.y < y + h);
-}
 
 AttractionPoint::AttractionPoint(float x, float y) :
 	radius(10.0)

@@ -279,7 +279,13 @@ void MenuScene::draw()
 }
 
 void MenuScene::keyPressed(int key) {
-	if (game_state == ending) {
+	if (game_state == MenuScene::opening && key == OF_KEY_RETURN) {
+		return;
+	}
+	else if (game_state == MenuScene::opening) {
+		game_state = MenuScene::play;
+	}
+	else if (game_state == MenuScene::ending) {
 		return;
 	}
 
