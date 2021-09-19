@@ -9,7 +9,7 @@
 class Scene {
 public:
 	enum SceneIdx {
-		quit_scene = 0, title_scene, menu_scene, setting_scene, game_scene01, game_scene02, game_scene03, game_scene04, game_scene05
+		quit_scene = 0, title_scene, menu_scene, setting_scene, game_scene01, game_scene02, game_scene03
 	};
 
 	virtual ~Scene() {};
@@ -126,13 +126,12 @@ private:
 	void draw();
 	void keyPressed(int key);
 	void feadout(int mun) {};
-	void toggle_fullscreen();
 
 	int transition_counter = 0;
 	int transition_time = 0;
 	bool can_change_scene = false;
 	bool is_transiting = false;
-	int choice_idx; //play = 0, setting, quit,
+	int choice_idx;
 	int push_counter, push_counter2;
 
 	std::unique_ptr<ofTrueTypeFont> SourceHanSans;

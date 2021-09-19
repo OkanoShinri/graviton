@@ -19,7 +19,7 @@ public:
 	ofVec2f move();
 	void simulate_move();
 	void draw() const;
-	void onDashPanel(float x, float y, int w, int h, int direction);
+	bool onDashPanel(float x, float y, int w, int h, int direction);
 	void addAttraction(ofVec2f attraction_pos);
 	void resetAttraction();
 	void addRepulsion(ofVec2f repulsion_pos);
@@ -42,9 +42,17 @@ public:
 	}
 	bool getBoxIntersection(float x, float y, int w, int h);
 	
-	bool isInBox(const float x, const float y, const int w, const int h, const float mx, const float my)
+	inline bool isInBox(const float x, const float y, const int w, const int h, const float mx, const float my)
 	{
 		return (x < mx && mx < x + w && y < my && my < y + h);
+	};
+	inline bool isInCircle(const float x, const float y, const float r, const float mx, const float my)
+	{
+		return ((x - mx)*(x - mx) + (y - my)*(y - my) < r*r);
+	};
+	bool isInCircle(const float x, const float y, const float r)
+	{
+		return ((x - pos.x)*(x - pos.x) + (y - pos.y)*(y - pos.y) < r*r);
 	};
 	bool isClear() {
 		return  (clear_area_x < pos.x 
@@ -100,55 +108,17 @@ public:
 	void setPos(float x, float y);
 };
 
-class Target {
-private:
-	ofVec2f pos;
-	int id;
-	float radius;
-	bool can_remove;
-
-public:
-	Target(int id);
-	void update(ofVec2f cam_pos);
-	void draw();
-	bool is_hit(ofVec2f cam_pos);
-	bool canRemove() {
-		return can_remove;
-	};
-};
-
-class Wall {
-public:
-	Wall(int x_1, int y_1, int x_2, int y_2);
-	void draw();
-	void update();
-	void relative_move(ofVec2f delta);
-	bool canRemove() {
-		return max(x1, x2) < -100;
-	};
-	inline float getX1() { return x1; };
-	inline float getY1() { return y1; };
-	inline float getX2() { return x2; };
-	inline float getY2() { return y2; };
-private:
-	//ofVec2f pos1, pos2;
-	float x1, y1, x2, y2;
-};
 
 class Obstacle {
 public:
-	Obstacle():width(0), height(0) {};
+	//Obstacle():width(0), height(0) {};
 	Obstacle(int x, int y, int w, int h);
 	virtual void draw(const ofVec2f center_pos);
 	virtual void update(const ofVec2f center_pos);
-	bool canRemove() {
-		return false;
-	};
-
-	inline float getX() { return this->pos.x; };
-	inline float getY() { return this->pos.y; };
-	inline int getW() { return this->width; };
-	inline int getH() { return this->height; };
+	virtual inline float getX() { return this->pos.x; };
+	virtual inline float getY() { return this->pos.y; };
+	virtual inline int getW() { return this->width; };
+	virtual inline int getH() { return this->height; };
 
 private:
 	ofVec2f pos;
@@ -158,10 +128,14 @@ private:
 
 class MovingObstacle : public Obstacle {
 public:
-	MovingObstacle():counter(0),width(0),height(0) {};
+	//MovingObstacle():counter(0),width(0),height(0) {};
 	MovingObstacle(int x, int y, int w, int h, int movex1, int movey1);
 	void draw(const ofVec2f center_pos);
 	void update(const ofVec2f center_pos);
+	inline float getX() { return this->pos.x; };
+	inline float getY() { return this->pos.y; };
+	inline int getW() { return this->width; };
+	inline int getH() { return this->height; };
 private:
 	bool move;
 	const ofVec2f init_pos;
@@ -184,4 +158,17 @@ public:
 private:
 	const ofVec2f m_pos;
 	const int m_direction, m_width, m_height;
+};
+
+class Target {
+public:
+	Target(int x, int y);
+	void draw(const ofVec2f center_pos);
+	void update();
+	inline float getX() { return this->m_pos.x; };
+	inline float getY() { return this->m_pos.y; };
+	inline int getR() { return this->m_radius; };
+private:
+	const ofVec2f m_pos;
+	const float m_radius;
 };

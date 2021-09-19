@@ -99,12 +99,6 @@ std::unique_ptr<Scene> ofApp::sceneFactory(Scene::SceneIdx idx)
 	case Scene::game_scene03:
 		return std::make_unique<GameScene03>(std::move(setting_parameter));
 		break;
-	case Scene::game_scene04:
-		return std::make_unique<GameScene02>(std::move(setting_parameter));
-		break;
-	case Scene::game_scene05:
-		return std::make_unique<GameScene01>(std::move(setting_parameter));
-		break;
 	default:
 		break;
 	}

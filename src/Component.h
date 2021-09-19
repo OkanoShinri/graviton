@@ -35,7 +35,12 @@ public:
 		sprintf_s(second, "%02d", (counter / 60) % 60);
 		char m_second[3];
 		sprintf_s(m_second, "%02d", (int)ofMap(counter % 60, 0, 60, 0, 99));
-		ofSetColor(0, 0, 0);
+		if (activate) {
+			ofSetColor(0, 0, 0);
+		}
+		else{
+			ofSetColor(255, 0, 0);
+		}
 		font->drawString("" + std::string(minute) + ":" + std::string(second) + "." + std::string(m_second), x, y);
 	}
 private:
