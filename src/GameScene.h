@@ -88,7 +88,7 @@ private:
 	ofEasyCam cam;
 	SceneIdx next_scene = game_scene03;
 	std::list< std::unique_ptr<Obstacle> > obstacles;
-	std::list< std::unique_ptr<Wall> > walls;
+	std::list< std::unique_ptr<DashPanel> > dash_panels;
 	std::shared_ptr<ofTrueTypeFont> SourceHanSans;
 	std::unique_ptr<AttractionPoint> attraction_point;
 	std::unique_ptr<BackGroundImage> back_ground;

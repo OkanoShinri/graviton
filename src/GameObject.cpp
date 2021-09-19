@@ -45,16 +45,16 @@ void MyShip::simulate_move()
 	force = (attraction + repulsion);
 	velocity += force;
 	if (velocity.x < -max_speed) {
-		velocity.x = -max_speed;
+		velocity.x += 0.1;
 	}
 	if (velocity.x > max_speed) {
-		velocity.x = max_speed;
+		velocity.x -= 0.1;
 	}
 	if (velocity.y < -max_speed) {
-		velocity.y = -max_speed;
+		velocity.y += 0.1;
 	}
 	if (velocity.y > max_speed) {
-		velocity.y = max_speed;
+		velocity.y -= 0.1;
 	}
 }
 
@@ -64,6 +64,29 @@ void MyShip::draw() const
 	ofDrawRectangle(clear_area_x, clear_area_y, clear_area_w, clear_area_h);
 	ofSetColor(0, 0, 0);
 	ofDrawCircle(pos, radius);
+}
+
+void MyShip::onDashPanel(float x, float y, int w, int h, int direction)
+{
+	if (isInBox(x, y, w, h, pos.x, pos.y)) {
+		switch (direction)
+		{
+		case 1://up
+			velocity.y = -7.f;
+			break;
+		case 2://right
+			velocity.x = 7.f;
+			break;
+		case 3://down
+			velocity.y = 7.f;
+			break;
+		case 4://left
+			velocity.x = -7.f;
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void MyShip::addAttraction(ofVec2f attraction_pos)
@@ -258,14 +281,12 @@ void Wall::relative_move(ofVec2f delta)
 	y2 += delta.y;
 }
 
-Obstacle::Obstacle(int x, int y, int w, int h)
+Obstacle::Obstacle(int x, int y, int w, int h) :
+	pos(ofVec2f(x, y)), width(w), height(h)
 {
-	pos = ofVec2f(x, y);
-	width = w;
-	height = h;
 }
 
-void Obstacle::draw(ofVec2f center_pos)
+void Obstacle::draw(const ofVec2f center_pos)
 {
 	if (pos.x + width < center_pos.x - 512 || center_pos.x + 512 < pos.x || pos.y + height < center_pos.y - 384 || center_pos.y + 384 < pos.y) {
 		return;
@@ -274,16 +295,14 @@ void Obstacle::draw(ofVec2f center_pos)
 	ofDrawRectangle(pos, width, height);
 }
 
-void Obstacle::update(ofVec2f center_pos)
+void Obstacle::update(const ofVec2f center_pos)
 {
 }
 
 MovingObstacle::MovingObstacle(int x, int y, int w, int h, int movex1, int movey1):
-	counter(0), init_pos(ofVec2f(x, y))
+	counter(0), init_pos(ofVec2f(x, y)),  width(w), height(h)
 {
 	pos = ofVec2f(movex1, movey1);
-	width = w;
-	height = h;
 	amplitude_x = abs(movex1 - x);
 	amplitude_y = abs(movey1 - y);
 
@@ -295,13 +314,13 @@ MovingObstacle::MovingObstacle(int x, int y, int w, int h, int movex1, int movey
 	}
 }
 
-void MovingObstacle::draw(ofVec2f center_pos)
+void MovingObstacle::draw(const ofVec2f center_pos)
 {
 	Obstacle::draw(center_pos);
 }
 
 
-void MovingObstacle::update(ofVec2f center_pos)
+void MovingObstacle::update(const ofVec2f center_pos)
 {
 	if (pos.x + width < center_pos.x - 512 || center_pos.x + 512 < pos.x || pos.y + height < center_pos.y - 384 || center_pos.y + 384 < pos.y) {
 		return;
@@ -311,4 +330,38 @@ void MovingObstacle::update(ofVec2f center_pos)
 		pos.y = init_pos.y + amplitude_y * (1 + cos(counter / 100.0))*0.5;
 	}
 	counter++;
+}
+
+DashPanel::DashPanel(int x, int y, int w, int h, int direction):
+	m_pos(ofVec2f(x, y)), m_width(w), m_height(h),m_direction(direction)
+{
+}
+
+void DashPanel::draw(const ofVec2f center_pos)
+{
+	if (m_pos.x + m_width < center_pos.x - 512 || center_pos.x + 512 < m_pos.x ||m_pos.y + m_height < center_pos.y - 384 || center_pos.y + 384 < m_pos.y) {
+		return;
+	}
+	ofSetColor(255, 165, 0);
+	switch (m_direction)
+	{
+	case 1://up
+		ofDrawTriangle(m_pos.x + m_width / 2, m_pos.y, m_pos.x + m_width, m_pos.y + m_height, m_pos.x, m_pos.y + m_height);
+		break;
+	case 2://right
+		ofDrawTriangle(m_pos.x, m_pos.y, m_pos.x + m_width, m_pos.y + m_height / 2, m_pos.x, m_pos.y + m_height);
+		break;
+	case 3://down
+		ofDrawTriangle(m_pos.x, m_pos.y, m_pos.x + m_width, m_pos.y, m_pos.x + m_width / 2, m_pos.y + m_height);
+		break;
+	case 4://left
+		ofDrawTriangle(m_pos.x, m_pos.y + m_height / 2, m_pos.x + m_width, m_pos.y, m_pos.x + m_width, m_pos.y + m_height);
+		break;
+	default:
+		break;
+	}
+}
+
+void DashPanel::update()
+{
 }

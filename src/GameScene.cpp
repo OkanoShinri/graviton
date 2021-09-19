@@ -398,15 +398,23 @@ GameScene02::GameScene02(std::unique_ptr<SettingParameter>&& _setting_parameter)
 				map_x++;
 				break;
 			case '1':
-				obstacles.emplace_back(std::make_unique<Obstacle>(map_x * 50, map_y * 50, 50, 50));
+				dash_panels.emplace_back(std::make_unique<DashPanel>(map_x * 50, map_y * 50, 50, 50, 1));
 				map_x++;
 				break;
 			case '2':
-				obstacles.emplace_back(std::make_unique<MovingObstacle>(map_x * 50, map_y * 50, 50, 50, map_x * 50 + 400, map_y * 50));
+				dash_panels.emplace_back(std::make_unique<DashPanel>(map_x * 50, map_y * 50, 50, 50, 2));
 				map_x++;
 				break;
 			case '3':
-				obstacles.emplace_back(std::make_unique<MovingObstacle>(map_x * 50, map_y * 50, 50, 50, map_x * 50, map_y * 50 + 400));
+				dash_panels.emplace_back(std::make_unique<DashPanel>(map_x * 50, map_y * 50, 50, 50, 3));
+				map_x++;
+				break;
+			case '4':
+				dash_panels.emplace_back(std::make_unique<DashPanel>(map_x * 50, map_y * 50, 50, 50, 4));
+				map_x++;
+				break;
+			case '5':
+				obstacles.emplace_back(std::make_unique<Obstacle>(map_x * 50, map_y * 50, 50, 50));
 				map_x++;
 				break;
 			case '6':
@@ -455,7 +463,7 @@ GameScene02::GameScene02(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	rep_clk_se->setMultiPlay(true);
 
 	game_bgm = std::make_unique<ofSoundPlayer>();
-	game_bgm->load("—¬Œ¶.mp3");
+	game_bgm->load("HOPPING_LIFE.mp3");
 	game_bgm->setLoop(true);
 	game_bgm->setVolume(setting_parameter->bgm_volume);
 }
@@ -469,7 +477,7 @@ void GameScene02::update()
 {
 	back_ground->updata();
 	timer->update();
-
+	ofVec2f cam_pos = my_ship->getPos();
 	switch (game_state)
 	{
 	case GameScene02::opening:
@@ -506,7 +514,7 @@ void GameScene02::update()
 
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->update(my_ship->getPos());
+			(*it)->update(cam_pos);
 			my_ship->getBoxIntersection((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
 			if ((*it)->canRemove())
@@ -517,14 +525,23 @@ void GameScene02::update()
 				++it;
 			}
 		}
+		for (auto it = this->dash_panels.begin(); it != this->dash_panels.end();)
+		{
+			(*it)->update();
+			my_ship->onDashPanel((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH(), (*it)->getDirection());
+
+			++it;
+			
+		}
 
 		my_ship->update();
-		cam.setPosition(ofVec3f(my_ship->getPos().x, my_ship->getPos().y, 0));
+		cam_pos = my_ship->getPos();
+		cam.setPosition(ofVec3f(cam_pos.x, cam_pos.y, 0));
 
 		//is gameover
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			if (my_ship->isInBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH(), my_ship->getPos().x, my_ship->getPos().y)) {
+			if (my_ship->isInBox((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH(), cam_pos.x, cam_pos.y)) {
 				game_state = GameScene02::game_over;
 				timer->stop();
 				counter = 0;
@@ -573,6 +590,7 @@ void GameScene02::draw()
 	ofSetColor(255, 255, 255);
 	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 	cam.begin();
+	ofVec2f cam_pos = my_ship->getPos();
 	switch (game_state)
 	{
 	case GameScene02::opening:
@@ -580,14 +598,19 @@ void GameScene02::draw()
 
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->draw(my_ship->getPos());
+			(*it)->draw(cam_pos);
 			it++;
 		}
 		break;
 	case GameScene02::play:
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->draw(my_ship->getPos());
+			(*it)->draw(cam_pos);
+			it++;
+		}
+		for (auto it = this->dash_panels.begin(); it != this->dash_panels.end();)
+		{
+			(*it)->draw(cam_pos);
 			it++;
 		}
 
@@ -602,7 +625,12 @@ void GameScene02::draw()
 	case GameScene02::game_over:
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->draw(my_ship->getPos());
+			(*it)->draw(cam_pos);
+			it++;
+		}
+		for (auto it = this->dash_panels.begin(); it != this->dash_panels.end();)
+		{
+			(*it)->draw(cam_pos);
 			it++;
 		}
 
@@ -618,7 +646,12 @@ void GameScene02::draw()
 		ofSetColor(255, 255, 255, ofMap(counter, 0, 180, 255, 0));
 		for (auto it = this->obstacles.begin(); it != this->obstacles.end();)
 		{
-			(*it)->draw(my_ship->getPos());
+			(*it)->draw(cam_pos);
+			it++;
+		}
+		for (auto it = this->dash_panels.begin(); it != this->dash_panels.end();)
+		{
+			(*it)->draw(cam_pos);
 			it++;
 		}
 

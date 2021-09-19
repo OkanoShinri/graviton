@@ -19,6 +19,7 @@ public:
 	ofVec2f move();
 	void simulate_move();
 	void draw() const;
+	void onDashPanel(float x, float y, int w, int h, int direction);
 	void addAttraction(ofVec2f attraction_pos);
 	void resetAttraction();
 	void addRepulsion(ofVec2f repulsion_pos);
@@ -136,10 +137,10 @@ private:
 
 class Obstacle {
 public:
-	Obstacle() {};
+	Obstacle():width(0), height(0) {};
 	Obstacle(int x, int y, int w, int h);
-	virtual void draw(ofVec2f center_pos);
-	virtual void update(ofVec2f center_pos);
+	virtual void draw(const ofVec2f center_pos);
+	virtual void update(const ofVec2f center_pos);
 	bool canRemove() {
 		return false;
 	};
@@ -149,21 +150,38 @@ public:
 	inline int getW() { return this->width; };
 	inline int getH() { return this->height; };
 
-protected:
+private:
 	ofVec2f pos;
-	int width, height;
+	const int width, height;
 };
 
 
 class MovingObstacle : public Obstacle {
 public:
-	MovingObstacle():counter(0) {};
+	MovingObstacle():counter(0),width(0),height(0) {};
 	MovingObstacle(int x, int y, int w, int h, int movex1, int movey1);
-	void draw(ofVec2f center_pos);
-	void update(ofVec2f center_pos);
+	void draw(const ofVec2f center_pos);
+	void update(const ofVec2f center_pos);
 private:
 	bool move;
 	const ofVec2f init_pos;
+	ofVec2f pos;
+	const int width, height;
 	int counter;
 	double amplitude_x, amplitude_y;
+};
+
+class DashPanel {
+public:
+	DashPanel(int x, int y, int w, int h, int direction);
+	void draw(const ofVec2f center_pos);
+	void update();
+	inline float getX() { return this->m_pos.x; };
+	inline float getY() { return this->m_pos.y; };
+	inline int getW() { return this->m_width; };
+	inline int getH() { return this->m_height; };
+	inline int getDirection() { return m_direction; }
+private:
+	const ofVec2f m_pos;
+	const int m_direction, m_width, m_height;
 };
