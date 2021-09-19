@@ -107,8 +107,8 @@ MenuScene::MenuScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	game_state = opening;
 	counter = 0;
 
-	std::vector<SceneIdx> data{ game_scene01,game_scene02,game_scene03,game_scene04,game_scene05 };
-	std::vector<std::string> data_str{ "room1","room2", "room3","room4", "room5" };
+	std::vector<SceneIdx> data{ game_scene01,game_scene02,game_scene03 };
+	std::vector<std::string> data_str{ "room1","room2", "room3" };
 
 	game_selector = std::make_unique<Selector<SceneIdx>>(data, data_str, true);
 
@@ -349,6 +349,19 @@ void SettingScene::update()
 		}
 		return;
 	}
+
+	if (setting_parameter->bgm_volume < 0) {
+		setting_parameter->bgm_volume = 0;
+	}
+	else if (setting_parameter->bgm_volume > 1) {
+		setting_parameter->bgm_volume = 1;
+	}
+	if (setting_parameter->se_volume < 0) {
+		setting_parameter->se_volume = 0;
+	}
+	else if (setting_parameter->se_volume > 1) {
+		setting_parameter->se_volume = 1;
+	}
 }
 
 void SettingScene::draw()
@@ -358,8 +371,6 @@ void SettingScene::draw()
 
 	ofVec2f volume_pos = ofVec2f(setting_parameter->window_width / 8, setting_parameter->window_height * 3 / 10);
 	ofVec2f se_pos = ofVec2f(setting_parameter->window_width / 8, setting_parameter->window_height * 4 / 10);
-	ofVec2f fullscreen_pos = ofVec2f(setting_parameter->window_width / 8, setting_parameter->window_height * 5 / 10);
-	ofVec2f num_of_balls_pos = ofVec2f(setting_parameter->window_width / 8, setting_parameter->window_height * 6 / 10);
 	ofVec2f return_pos = ofVec2f(setting_parameter->window_width / 2 - 30, setting_parameter->window_height * 5 / 6);
 
 	float bar_left = setting_parameter->window_width * 4 / 8;
@@ -390,27 +401,9 @@ void SettingScene::draw()
 	ofFill();
 	ofSetLineWidth(1.0);
 	ofDrawCircle(ofMap(setting_parameter->se_volume, 0, 1, bar_left, bar_right), se_pos.y, 10);
+	
 
-	SourceHanSans->drawString("Full Screen", fullscreen_pos.x, fullscreen_pos.y);
-	SourceHanSans->drawString("ON", fullscreen_pos.x * 4, fullscreen_pos.y);
-	SourceHanSans->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
-	if (setting_parameter->is_fullscreen) {
-		ofDrawRectangle(fullscreen_pos.x * 4 - 15, fullscreen_pos.y - 40, 75, 50);
-		SourceHanSans->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
-		ofSetColor(255, 255, 255);
-		SourceHanSans->drawString("ON", fullscreen_pos.x * 4, fullscreen_pos.y);
-	}
-	else {
-		ofDrawRectangle(fullscreen_pos.x * 6 - 20, fullscreen_pos.y - 40, 100, 50);
-		SourceHanSans->drawString("ON", bar_left, fullscreen_pos.y);
-		ofSetColor(255, 255, 255);
-		SourceHanSans->drawString("OFF", fullscreen_pos.x * 6, fullscreen_pos.y);
-	}
 	ofSetColor(0, 0, 0);
-
-	SourceHanSans->drawString("Number of balls", num_of_balls_pos.x, num_of_balls_pos.y);
-	SourceHanSans->drawString(std::to_string(setting_parameter->num_ball), num_of_balls_pos.x * 5, num_of_balls_pos.y);
-
 	SourceHanSans->drawString("Return", return_pos.x, return_pos.y);
 
 	//----------cursor----------------
@@ -425,12 +418,6 @@ void SettingScene::draw()
 		ofTranslate(se_pos.x - 30, se_pos.y - size_of_cursor_r, 0);
 		break;
 	case 2:
-		ofTranslate(fullscreen_pos.x - 30, fullscreen_pos.y - size_of_cursor_r, 0);
-		break;
-	case 3:
-		ofTranslate(num_of_balls_pos.x - 30, num_of_balls_pos.y - size_of_cursor_r, 0);
-		break;
-	case 4:
 		ofTranslate(return_pos.x - 30, return_pos.y - size_of_cursor_r, 0);
 		break;
 
@@ -461,10 +448,10 @@ void SettingScene::keyPressed(int key)
 
 	switch (key) {
 	case OF_KEY_DOWN:
-		choice_idx = (choice_idx + 1) % 5;
+		choice_idx = (choice_idx + 1) % 3;
 		break;
 	case OF_KEY_UP:
-		choice_idx = (choice_idx + 4) % 5;
+		choice_idx = (choice_idx + 2) % 3;
 		break;
 	case OF_KEY_LEFT:
 		if (choice_idx == 0)
@@ -475,14 +462,7 @@ void SettingScene::keyPressed(int key)
 		{
 			setting_parameter->se_volume -= 0.02;
 		}
-		else if (choice_idx == 2)
-		{
-			toggle_fullscreen();
-		}
-		else if (choice_idx == 3)
-		{
-			setting_parameter->num_ball--;
-		}
+
 		break;
 	case OF_KEY_RIGHT:
 		if (choice_idx == 0)
@@ -493,45 +473,14 @@ void SettingScene::keyPressed(int key)
 		{
 			setting_parameter->se_volume += 0.02;
 		}
-		else if (choice_idx == 2)
-		{
-			toggle_fullscreen();
-		}
-		else if (choice_idx == 3)
-		{
-			setting_parameter->num_ball++;
-		}
 		break;
 	case OF_KEY_RETURN:
 		if (choice_idx == 2)
 		{
-			toggle_fullscreen();
-		}
-		else if (choice_idx == 4)
-		{
 			this->is_transiting = true;
 			this->transition_counter = 0;
 		}
-
 		break;
 	}
-	if (setting_parameter->num_ball < 1)
-	{
-		setting_parameter->num_ball = 1;
-	}
-	else if (setting_parameter->MAX_BALL < setting_parameter->num_ball)
-	{
-		setting_parameter->num_ball = setting_parameter->MAX_BALL;
-	}
-}
 
-void SettingScene::toggle_fullscreen()
-{
-	assert(setting_parameter != nullptr);
-	ofToggleFullscreen();
-	setting_parameter->is_fullscreen = !setting_parameter->is_fullscreen;
-	float w = ofGetWindowWidth(), h = ofGetWindowHeight();
-	setting_parameter->scale = std::min(w / 1024, h / 768);
-	setting_parameter->offset_x = (w - 1024 * setting_parameter->scale) / 2;
-	setting_parameter->offset_y = (h - 768 * setting_parameter->scale) / 2;
 }

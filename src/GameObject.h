@@ -19,7 +19,7 @@ public:
 	ofVec2f move();
 	void simulate_move();
 	void draw() const;
-	void onDashPanel(float x, float y, int w, int h, int direction);
+	bool onDashPanel(float x, float y, int w, int h, int direction);
 	void addAttraction(ofVec2f attraction_pos);
 	void resetAttraction();
 	void addRepulsion(ofVec2f repulsion_pos);
@@ -42,9 +42,17 @@ public:
 	}
 	bool getBoxIntersection(float x, float y, int w, int h);
 	
-	bool isInBox(const float x, const float y, const int w, const int h, const float mx, const float my)
+	inline bool isInBox(const float x, const float y, const int w, const int h, const float mx, const float my)
 	{
 		return (x < mx && mx < x + w && y < my && my < y + h);
+	};
+	inline bool isInCircle(const float x, const float y, const float r, const float mx, const float my)
+	{
+		return ((x - mx)*(x - mx) + (y - my)*(y - my) < r*r);
+	};
+	bool isInCircle(const float x, const float y, const float r)
+	{
+		return ((x - pos.x)*(x - pos.x) + (y - pos.y)*(y - pos.y) < r*r);
 	};
 	bool isClear() {
 		return  (clear_area_x < pos.x 
@@ -98,23 +106,6 @@ public:
 		return pos;
 	}
 	void setPos(float x, float y);
-};
-
-class Target {
-private:
-	ofVec2f pos;
-	int id;
-	float radius;
-	bool can_remove;
-
-public:
-	Target(int id);
-	void update(ofVec2f cam_pos);
-	void draw();
-	bool is_hit(ofVec2f cam_pos);
-	bool canRemove() {
-		return can_remove;
-	};
 };
 
 class Wall {
@@ -184,4 +175,17 @@ public:
 private:
 	const ofVec2f m_pos;
 	const int m_direction, m_width, m_height;
+};
+
+class Target {
+public:
+	Target(int x, int y);
+	void draw(const ofVec2f center_pos);
+	void update();
+	inline float getX() { return this->m_pos.x; };
+	inline float getY() { return this->m_pos.y; };
+	inline int getR() { return this->m_radius; };
+private:
+	const ofVec2f m_pos;
+	const float m_radius;
 };
