@@ -234,13 +234,7 @@ void GameScene01::update()
 
 void GameScene01::draw()
 {
-
-
-	//ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
-	//ofScale(setting_parameter->scale, setting_parameter->scale);
-	//back_ground->draw();
-	ofSetColor(255, 255, 255);
-	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+	back_ground->draw();
 	cam.begin();
 	ofVec2f cam_pos = my_ship->getPos();
 	switch (game_state)
@@ -614,13 +608,7 @@ void GameScene02::update()
 
 void GameScene02::draw()
 {
-
-
-	//ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
-	//ofScale(setting_parameter->scale, setting_parameter->scale);
-	//back_ground->draw();
-	ofSetColor(255, 255, 255);
-	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+	back_ground->draw();
 	cam.begin();
 	switch (game_state)
 	{
@@ -1002,13 +990,7 @@ void GameScene03::update()
 
 void GameScene03::draw()
 {
-
-
-	//ofTranslate(setting_parameter->offset_x, setting_parameter->offset_y);
-	//ofScale(setting_parameter->scale, setting_parameter->scale);
-	//back_ground->draw();
-	ofSetColor(255, 255, 255);
-	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+	back_ground->draw();
 	cam.begin();
 	ofVec2f cam_pos = my_ship->getPos();
 	switch (game_state)

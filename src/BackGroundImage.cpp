@@ -3,7 +3,7 @@
 BackGroundImage::BackGroundImage()
 {
 	images.emplace_back(std::make_unique<ofImage>());
-	images.back()->load("nc229388.jpg");
+	images.back()->load("ga08-5.png");
 }
 
 void BackGroundImage::updata()
@@ -12,9 +12,8 @@ void BackGroundImage::updata()
 
 void BackGroundImage::draw()
 {
-	//images.back()->draw(0, 0);
-	ofSetColor(255, 255, 255);
-	ofDrawRectangle(0, 0, 1280, 720);
+	ofSetColor(255, 255, 255, 20);
+	images.back()->draw(0, 0);
 }
 
 void BackGroundImage::changeImage()
