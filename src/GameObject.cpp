@@ -21,7 +21,7 @@ void MyShip::update()
 }
 
 ofVec2f MyShip::move() {
-	
+	/*
 	if (delta_x_in_box && delta_y_in_box) {
 		velocity = -velocity;
 	}
@@ -33,6 +33,17 @@ ofVec2f MyShip::move() {
 	}
 	else if (delta_pos_in_box) {
 		velocity = -velocity;
+	}
+	*/
+	if (delta_x_in_box) {
+		velocity.x = -velocity.x;
+	}
+	if (delta_y_in_box) {
+		velocity.y = -velocity.y;
+	}
+	if (!delta_x_in_box && !delta_y_in_box && delta_pos_in_box) {
+		velocity.x = -velocity.x;
+		velocity.y = -velocity.y;
 	}
 	
 	pos += velocity;
@@ -235,31 +246,6 @@ void RepulsionPoint::setPos(float x, float y)
 	pos.y = y;
 }
 
-Wall::Wall(int x_1, int y_1, int x_2, int y_2)
-{
-	x1 = x_1;
-	y1 = y_1;
-	x2 = x_2;
-	y2 = y_2;
-}
-
-void Wall::draw()
-{
-	ofSetColor(0, 0, 0);
-	ofDrawLine(x1, y1, x2, y2);
-}
-
-void Wall::update()
-{
-}
-
-void Wall::relative_move(ofVec2f delta)
-{
-	x1 += delta.x;
-	y1 += delta.y;
-	x2 += delta.x;
-	y2 += delta.y;
-}
 
 Obstacle::Obstacle(int x, int y, int w, int h) :
 	pos(ofVec2f(x, y)), width(w), height(h)
@@ -279,8 +265,8 @@ void Obstacle::update(const ofVec2f center_pos)
 {
 }
 
-MovingObstacle::MovingObstacle(int x, int y, int w, int h, int movex1, int movey1):
-	counter(0), init_pos(ofVec2f(x, y)),  width(w), height(h)
+MovingObstacle::MovingObstacle(int x, int y, int w, int h, int movex1, int movey1) :
+	Obstacle(x, y, w, h), width(w), height(h), counter(0), init_pos(ofVec2f(x, y))
 {
 	pos = ofVec2f(movex1, movey1);
 	amplitude_x = abs(movex1 - x);
@@ -296,7 +282,11 @@ MovingObstacle::MovingObstacle(int x, int y, int w, int h, int movex1, int movey
 
 void MovingObstacle::draw(const ofVec2f center_pos)
 {
-	Obstacle::draw(center_pos);
+	if (pos.x + width < center_pos.x - 512 || center_pos.x + 512 < pos.x || pos.y + height < center_pos.y - 384 || center_pos.y + 384 < pos.y) {
+		return;
+	}
+	ofSetColor(0, 0, 0);
+	ofDrawRectangle(pos, width, height);
 }
 
 

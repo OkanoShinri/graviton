@@ -102,7 +102,7 @@ GameScene01::GameScene01(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	dash_se = std::make_unique<ofSoundPlayer>();
 	dash_se->load("Œˆ’èAƒ{ƒ^ƒ“‰Ÿ‰º43.mp3");
 	dash_se->setVolume(setting_parameter->se_volume);
-	dash_se->setMultiPlay(true);
+	dash_se->setMultiPlay(false);
 
 	//BGM
 	std::ifstream ifs("../bin/data/config.txt");
@@ -167,13 +167,7 @@ void GameScene01::update()
 			(*it)->update(cam_pos);
 			my_ship->getBoxIntersection((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
-			if ((*it)->canRemove())
-			{
-				it = this->obstacles.erase(it);
-			}
-			else {
-				++it;
-			}
+			++it;
 		}
 		for (auto it = this->dash_panels.begin(); it != this->dash_panels.end();)
 		{
@@ -183,7 +177,6 @@ void GameScene01::update()
 			}
 
 			++it;
-
 		}
 
 		my_ship->update();
@@ -345,7 +338,7 @@ void GameScene01::keyPressed(int key) {
 		game_state = GameScene01::game_over;
 		break;
 	case 'r':
-		next_scene = game_scene02;
+		next_scene = game_scene01;
 		can_change_scene = true;
 		break;
 	}
@@ -552,13 +545,7 @@ void GameScene02::update()
 			(*it)->update(my_ship->getPos());
 			my_ship->getBoxIntersection((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
-			if ((*it)->canRemove())
-			{
-				it = this->obstacles.erase(it);
-			}
-			else {
-				++it;
-			}
+			++it;
 		}
 
 		my_ship->update();
@@ -710,7 +697,7 @@ void GameScene02::keyPressed(int key) {
 		game_state = GameScene02::game_over;
 		break;
 	case 'r':
-		next_scene = game_scene01;
+		next_scene = game_scene02;
 		can_change_scene = true;
 		break;
 	}
@@ -920,13 +907,7 @@ void GameScene03::update()
 			(*it)->update(cam_pos);
 			my_ship->getBoxIntersection((*it)->getX(), (*it)->getY(), (*it)->getW(), (*it)->getH());
 
-			if ((*it)->canRemove())
-			{
-				it = this->obstacles.erase(it);
-			}
-			else {
-				++it;
-			}
+			++it;
 		}
 		for (auto it = this->targets.begin(); it != this->targets.end();)
 		{
