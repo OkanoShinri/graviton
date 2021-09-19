@@ -24,7 +24,7 @@ GameScene01::GameScene01(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	int stage_map_width = 500;
 	int stage_map_height = 50;
 	FILE *fp;
-	if ((fopen_s(&fp, "../bin/data/room1.csv", "r")) == 0)
+	if ((fopen_s(&fp, "data/room1.csv", "r")) == 0)
 	{
 		int map_x = 0, map_y = 0;
 		char block;
@@ -67,7 +67,6 @@ GameScene01::GameScene01(std::unique_ptr<SettingParameter>&& _setting_parameter)
 				break;
 			}
 		}
-		std::cout << "FILE LOAD" << std::endl;
 		fclose(fp);
 	}
 
@@ -105,7 +104,7 @@ GameScene01::GameScene01(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	dash_se->setMultiPlay(false);
 
 	//BGM
-	std::ifstream ifs("../bin/data/config.txt");
+	std::ifstream ifs("data/config.txt");
 	std::string str;
 	if (!ifs.fail()) {
 		for (int i = 0; i < 1; i++) {
@@ -120,7 +119,6 @@ GameScene01::GameScene01(std::unique_ptr<SettingParameter>&& _setting_parameter)
 
 GameScene01::~GameScene01()
 {
-	std::cout << "Remove: GameScene" << std::endl;
 }
 
 void GameScene01::update()
@@ -415,7 +413,7 @@ GameScene02::GameScene02(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	int stage_map_width = 500;
 	int stage_map_height = 50;
 	FILE *fp;
-	if ((fopen_s(&fp, "../bin/data/room2.csv", "r")) == 0)
+	if ((fopen_s(&fp, "data/room2.csv", "r")) == 0)
 	{
 		int map_x = 0, map_y = 0;
 		char block;
@@ -450,7 +448,6 @@ GameScene02::GameScene02(std::unique_ptr<SettingParameter>&& _setting_parameter)
 				break;
 			}
 		}
-		std::cout << "FILE LOAD" << std::endl;
 		fclose(fp);
 	}
 
@@ -483,7 +480,7 @@ GameScene02::GameScene02(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	rep_clk_se->setMultiPlay(true);
 
 	//BGM
-	std::ifstream ifs("../bin/data/config.txt");
+	std::ifstream ifs("data/config.txt");
 	std::string str;
 	if (!ifs.fail()) {
 		for (int i = 0; i < 2; i++) {
@@ -498,7 +495,6 @@ GameScene02::GameScene02(std::unique_ptr<SettingParameter>&& _setting_parameter)
 
 GameScene02::~GameScene02()
 {
-	std::cout << "Remove: GameScene" << std::endl;
 }
 
 void GameScene02::update()
@@ -776,7 +772,7 @@ GameScene03::GameScene03(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	int stage_map_width = 500;
 	int stage_map_height = 50;
 	FILE *fp;
-	if ((fopen_s(&fp, "../bin/data/room3.csv", "r")) == 0)
+	if ((fopen_s(&fp, "data/room3.csv", "r")) == 0)
 	{
 		int map_x = 0, map_y = 0;
 		char block;
@@ -807,7 +803,6 @@ GameScene03::GameScene03(std::unique_ptr<SettingParameter>&& _setting_parameter)
 				break;
 			}
 		}
-		std::cout << "FILE LOAD" << std::endl;
 		fclose(fp);
 	}
 
@@ -845,7 +840,7 @@ GameScene03::GameScene03(std::unique_ptr<SettingParameter>&& _setting_parameter)
 	target_break_se->setMultiPlay(true);
 
 	//BGM
-	std::ifstream ifs("../bin/data/config.txt");
+	std::ifstream ifs("data/config.txt");
 	std::string str;
 	if (!ifs.fail()) {
 		for (int i = 0; i < 3; i++) {
@@ -860,7 +855,6 @@ GameScene03::GameScene03(std::unique_ptr<SettingParameter>&& _setting_parameter)
 
 GameScene03::~GameScene03()
 {
-	std::cout << "Remove: GameScene03" << std::endl;
 }
 
 void GameScene03::update()

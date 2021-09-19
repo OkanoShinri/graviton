@@ -28,9 +28,7 @@ public:
 	void windowResized(int w, int h);
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
-	void exit() {
-		std::cout << "ofApp::exit()\n";
-	}
+	void exit() {}
 	std::unique_ptr<Scene> sceneFactory(Scene::SceneIdx idx);
 
 protected:

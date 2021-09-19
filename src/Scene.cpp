@@ -21,7 +21,6 @@ TitleScene::TitleScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 
 TitleScene::~TitleScene()
 {
-	std::cout << "Remove: TitleScene" << std::endl;
 }
 
 void TitleScene::update()
@@ -120,7 +119,6 @@ MenuScene::MenuScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 
 MenuScene::~MenuScene()
 {
-	std::cout << "Remove: TitleScene" << std::endl;
 }
 
 void MenuScene::mousePressed(int x, int y, int button)
@@ -333,9 +331,7 @@ SettingScene::SettingScene(std::unique_ptr<SettingParameter> _setting_parameter)
 	SourceHanSans->load("SourceHanSans001.ttf", 30);
 }
 
-SettingScene::~SettingScene()
-{
-	std::cout << "Remove: SettingScene" << std::endl;
+SettingScene::~SettingScene(){
 }
 
 void SettingScene::update()

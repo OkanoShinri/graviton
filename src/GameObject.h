@@ -13,7 +13,7 @@ private:
 
 public:
 	MyShip();
-	~MyShip() { std::cout << "Remove: MyShip" << std::endl; }
+	~MyShip() {}
 
 	void update();
 	ofVec2f move();
@@ -71,7 +71,7 @@ private:
 
 public:
 	AttractionPoint(float x, float y);
-	~AttractionPoint() { std::cout << "Remove: AttractionPoint" << std::endl; }
+	~AttractionPoint() {}
 
 	void update() {};
 	void move(ofVec2f delta) {
@@ -94,7 +94,7 @@ private:
 
 public:
 	RepulsionPoint(float x, float y);
-	~RepulsionPoint() { std::cout << "Remove: RepulsionPoint" << std::endl; }
+	~RepulsionPoint() {}
 
 	void update() {};
 	void move(ofVec2f delta) {
