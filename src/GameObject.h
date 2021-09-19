@@ -1,13 +1,15 @@
 #pragma once
 #include "ofMain.h"
 
+
 class MyShip
 {
 private:
-	bool is_hit;
+	bool delta_x_in_box, delta_y_in_box, delta_pos_in_box;
 	int counter, life, hit_anime_counter, clear_area_w = 0, clear_area_h = 0;
-	float radius, speed, clear_area_x = 0, clear_area_y = 0;
-	ofVec2f pos, vec, attraction, repulsion, force;
+	float radius, speed_rate,max_speed, clear_area_x = 0, clear_area_y = 0;
+	ofVec2f pos, attraction, repulsion, force;
+	ofVec2f velocity;
 
 public:
 	MyShip();
@@ -15,7 +17,9 @@ public:
 
 	void update();
 	ofVec2f move();
-	void draw();
+	void simulate_move();
+	void draw() const;
+	void onDashPanel(float x, float y, int w, int h, int direction);
 	void addAttraction(ofVec2f attraction_pos);
 	void resetAttraction();
 	void addRepulsion(ofVec2f repulsion_pos);
@@ -30,9 +34,18 @@ public:
 		clear_area_w = w;
 		clear_area_h = h;
 	}
-	bool isHitLine(float x1, float y1, float x2, float y2);
-	bool isHitBox(float x, float y, int w, int h);
-	bool isInBox(float x, float y, int w, int h);
+	void setSpeedRate(float a_speed_rate){
+		speed_rate = a_speed_rate;
+	}
+	void setMaxSpeed(float a_max_speed){
+		max_speed = a_max_speed;
+	}
+	bool getBoxIntersection(float x, float y, int w, int h);
+	
+	bool isInBox(const float x, const float y, const int w, const int h, const float mx, const float my)
+	{
+		return (x < mx && mx < x + w && y < my && my < y + h);
+	};
 	bool isClear() {
 		return  (clear_area_x < pos.x 
 			&& pos.x < clear_area_x + clear_area_w 
@@ -96,9 +109,9 @@ private:
 
 public:
 	Target(int id);
-	void update(ofVec2f my_pos);
+	void update(ofVec2f cam_pos);
 	void draw();
-	bool is_hit(ofVec2f my_pos);
+	bool is_hit(ofVec2f cam_pos);
 	bool canRemove() {
 		return can_remove;
 	};
@@ -124,10 +137,10 @@ private:
 
 class Obstacle {
 public:
-	Obstacle() {};
+	Obstacle():width(0), height(0) {};
 	Obstacle(int x, int y, int w, int h);
-	virtual void draw(ofVec2f center_pos);
-	virtual void update(ofVec2f center_pos);
+	virtual void draw(const ofVec2f center_pos);
+	virtual void update(const ofVec2f center_pos);
 	bool canRemove() {
 		return false;
 	};
@@ -137,21 +150,38 @@ public:
 	inline int getW() { return this->width; };
 	inline int getH() { return this->height; };
 
-protected:
+private:
 	ofVec2f pos;
-	int width, height;
+	const int width, height;
 };
 
 
 class MovingObstacle : public Obstacle {
 public:
-	MovingObstacle():counter(0) {};
+	MovingObstacle():counter(0),width(0),height(0) {};
 	MovingObstacle(int x, int y, int w, int h, int movex1, int movey1);
-	void draw(ofVec2f center_pos);
-	void update(ofVec2f center_pos);
+	void draw(const ofVec2f center_pos);
+	void update(const ofVec2f center_pos);
 private:
 	bool move;
 	const ofVec2f init_pos;
+	ofVec2f pos;
+	const int width, height;
 	int counter;
 	double amplitude_x, amplitude_y;
+};
+
+class DashPanel {
+public:
+	DashPanel(int x, int y, int w, int h, int direction);
+	void draw(const ofVec2f center_pos);
+	void update();
+	inline float getX() { return this->m_pos.x; };
+	inline float getY() { return this->m_pos.y; };
+	inline int getW() { return this->m_width; };
+	inline int getH() { return this->m_height; };
+	inline int getDirection() { return m_direction; }
+private:
+	const ofVec2f m_pos;
+	const int m_direction, m_width, m_height;
 };

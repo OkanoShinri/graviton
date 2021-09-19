@@ -58,7 +58,7 @@ public:
 		is_roop = roop;
 	};
 	inline void changeLeft() {
-		choice_idx = (choice_idx - 1) % choices.size();
+		choice_idx = (choice_idx + choices.size() - 1) % choices.size();
 	};
 	inline void changeRight() {
 		choice_idx = (choice_idx + 1) % choices.size();

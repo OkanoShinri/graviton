@@ -101,14 +101,14 @@ MenuScene::MenuScene(std::unique_ptr<SettingParameter>&& _setting_parameter)
 
 	can_change_scene = false;
 	is_transiting = false;
-	next_scene = Scene::game_scene1;
+	next_scene = Scene::game_scene01;
 
 	choice_idx = 0;
 	game_state = opening;
 	counter = 0;
 
-	std::vector<SceneIdx> data{ game_scene1,game_scene2 };
-	std::vector<std::string> data_str{ "room1","room2" };
+	std::vector<SceneIdx> data{ game_scene01,game_scene02,game_scene03,game_scene04,game_scene05 };
+	std::vector<std::string> data_str{ "room1","room2", "room3","room4", "room5" };
 
 	game_selector = std::make_unique<Selector<SceneIdx>>(data, data_str, true);
 
@@ -279,7 +279,13 @@ void MenuScene::draw()
 }
 
 void MenuScene::keyPressed(int key) {
-	if (game_state == ending) {
+	if (game_state == MenuScene::opening && key == OF_KEY_RETURN) {
+		return;
+	}
+	else if (game_state == MenuScene::opening) {
+		game_state = MenuScene::play;
+	}
+	else if (game_state == MenuScene::ending) {
 		return;
 	}
 
